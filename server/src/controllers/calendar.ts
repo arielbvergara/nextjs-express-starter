@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { googleAuth } from "../config/google";
 import { config } from "../config";
 import { CalendarService } from "../services/calendar";
+import { EmailService } from "../services/email";
 import { cache } from "../lib/cache";
 import { ApiResponse, CalendarEvent } from "../types";
 
@@ -47,6 +48,22 @@ export async function createEvent(
 
     // Invalidate cached event lists so the next GET reflects the new event
     cache.invalidatePrefix("calendar:events:");
+
+    // Send confirmation emails to attendees (non-blocking)
+    if (event.attendees?.length) {
+      const emailService = new EmailService();
+      const startTime = new Date(event.start.dateTime).toLocaleString();
+
+      Promise.allSettled(
+        event.attendees.map(({ email }) =>
+          emailService.sendEmail({
+            to: email,
+            subject: `Appointment Confirmed: ${event.summary}`,
+            body: `Your appointment "${event.summary}" has been scheduled for ${startTime}.\n\n${event.description ?? ""}`.trim(),
+          })
+        )
+      ).catch((err) => console.error("Calendar confirmation email error:", err.message));
+    }
 
     res.status(201).json({ success: true, data: created, message: "Event created successfully" });
   } catch (error: any) {

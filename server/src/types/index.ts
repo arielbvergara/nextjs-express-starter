@@ -32,6 +32,12 @@ export interface ContactRow {
   message: string;
 }
 
+export interface EmailPayload {
+  to: string;
+  subject: string;
+  body: string;
+}
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;

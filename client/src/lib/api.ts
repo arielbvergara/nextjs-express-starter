@@ -42,6 +42,12 @@ export interface ContactRowPayload {
   message: string;
 }
 
+export interface SendEmailPayload {
+  to: string;
+  subject: string;
+  body: string;
+}
+
 // ── Calendar ─────────────────────────────────────────
 export const calendar = {
   listEvents: (maxResults = 10) =>
@@ -65,5 +71,11 @@ export const drive = {
   downloadFile: (fileId: string) => `${API_BASE}/drive/files/${fileId}`,
 };
 
-export const api = { calendar, sheets, drive };
+// ── Email ─────────────────────────────────────────────
+export const email = {
+  send: (payload: SendEmailPayload) =>
+    request("/email/send", { method: "POST", body: JSON.stringify(payload) }),
+};
+
+export const api = { calendar, sheets, drive, email };
 export default api;
