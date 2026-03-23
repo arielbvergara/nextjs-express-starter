@@ -1,0 +1,25 @@
+{
+  "name": "basic-website-boilerplate",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Next.js + Express boilerplate with Google services integration",
+  "scripts": {
+    "dev": "pnpm --parallel dev:client dev:server",
+    "dev:client": "pnpm --filter client dev",
+    "dev:server": "pnpm --filter server dev",
+    "build": "pnpm --parallel build:client build:server",
+    "build:client": "pnpm --filter client build",
+    "build:server": "pnpm --filter server build",
+    "start": "pnpm --parallel start:client start:server",
+    "start:client": "pnpm --filter client start",
+    "start:server": "pnpm --filter server start",
+    "lint": "pnpm --parallel lint:client lint:server",
+    "lint:client": "pnpm --filter client lint",
+    "lint:server": "pnpm --filter server lint",
+    "type-check": "pnpm --parallel type-check:client type-check:server"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
