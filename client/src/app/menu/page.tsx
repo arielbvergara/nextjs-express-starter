@@ -1,33 +1,39 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { MenuItem } from "@/types";
 
-export default async function MenuPage() {
-  let items: MenuItem[] = [];
-  let errorMessage: string | null = null;
+export default function MenuPage() {
+  const [items, setItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  try {
-    const res = await api.menu.list();
-    if (res.success && res.data) {
-      items = res.data;
-    } else {
-      errorMessage = res.error ?? "Failed to load menu";
-    }
-  } catch {
-    errorMessage = "Failed to load menu";
-  }
+  useEffect(() => {
+    api.menu.list().then((res) => {
+      if (res.success && res.data) {
+        setItems(res.data);
+      } else {
+        setErrorMessage(res.error ?? "Failed to load menu");
+      }
+      setLoading(false);
+    });
+  }, []);
 
   return (
     <main className="min-h-screen p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight">Our Menu</h1>
-          <p className="text-[var(--muted)]">
-            Explore our selection of dishes
-          </p>
+          <p className="text-[var(--muted)]">Explore our selection of dishes</p>
         </div>
 
-        {errorMessage ? (
+        {loading ? (
+          <div className="rounded-lg border border-[var(--border)] p-6 text-center text-[var(--muted)]">
+            Loading menu…
+          </div>
+        ) : errorMessage ? (
           <div className="rounded-lg border border-[var(--border)] p-6 text-center text-[var(--muted)]">
             {errorMessage}
           </div>
