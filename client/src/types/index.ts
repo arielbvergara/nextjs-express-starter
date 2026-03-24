@@ -5,6 +5,16 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
+export interface MenuItem {
+  title: string;
+  description: string;
+  price1Description: string;
+  price1: string;
+  price2Description?: string;
+  price2?: string;
+  imageUrl: string;
+}
+
 export interface CalendarEvent {
   id?: string;
   summary: string;
