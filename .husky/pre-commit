@@ -10,6 +10,6 @@ echo "📝 Checking lint..."
 pnpm lint || exit 1
 
 echo "🔷 Checking types..."
-pnpm typecheck || exit 1
+pnpm type-check || exit 1
 
 echo "✅ Pre-commit checks passed!"
