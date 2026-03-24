@@ -3,6 +3,7 @@ import calendarRoutes from "./calendar";
 import sheetsRoutes from "./sheets";
 import driveRoutes from "./drive";
 import emailRoutes from "./email";
+import menuRoutes from "./menu";
 
 const router: IRouter = Router();
 
@@ -10,6 +11,7 @@ router.use("/calendar", calendarRoutes);
 router.use("/sheets", sheetsRoutes);
 router.use("/drive", driveRoutes);
 router.use("/email", emailRoutes);
+router.use("/menu", menuRoutes);
 
 // Health check
 router.get("/health", (_req, res) => {

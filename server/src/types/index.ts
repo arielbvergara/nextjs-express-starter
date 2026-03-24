@@ -38,6 +38,16 @@ export interface EmailPayload {
   body: string;
 }
 
+export interface MenuItem {
+  title: string;
+  description: string;
+  price1Description: string;
+  price1: string;
+  price2Description?: string;
+  price2?: string;
+  imageUrl: string;
+}
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;

@@ -92,6 +92,12 @@ export default function Home() {
                 desc: "Send a transactional email via the Gmail API using OAuth2",
                 icon: "✉️",
               },
+              {
+                href: "/menu",
+                label: "Restaurant Menu",
+                desc: "Display a restaurant menu fetched from a Google Sheet",
+                icon: "🍽️",
+              },
             ].map((example) => (
               <Link
                 key={example.href}
