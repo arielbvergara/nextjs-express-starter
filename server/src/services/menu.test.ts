@@ -6,7 +6,7 @@ import { GoogleAuth } from "google-auth-library";
 // no Google API calls are made in these tests.
 const service = new MenuService({} as GoogleAuth);
 
-const HEADER_ROW = ["Title", "description", "Price_1_description", "Price_1", "Price_2_description", "Price_2", "ImageUrl"];
+const HEADER_ROW = ["Title", "description", "Price_1_description", "Price_1", "Price_2_description", "Price_2", "ImageUrl", "Ingredients"];
 
 describe("MenuService.parseMenuItems", () => {
   it("parseMenuItems_ShouldReturnEmptyArray_WhenOnlyHeaderRowProvided", () => {
@@ -17,7 +17,7 @@ describe("MenuService.parseMenuItems", () => {
   it("parseMenuItems_ShouldMapAllFields_WhenRowIsComplete", () => {
     const rows = [
       HEADER_ROW,
-      ["Burger", "Juicy beef burger", "Single", "8.99", "Double", "14.99", "https://example.com/burger.jpg"],
+      ["Burger", "Juicy beef burger", "Single", "8.99", "Double", "14.99", "https://example.com/burger.jpg", "Beef patty, bun, lettuce, tomato"],
     ];
     const result = service.parseMenuItems(rows);
     expect(result).toHaveLength(1);
@@ -29,6 +29,7 @@ describe("MenuService.parseMenuItems", () => {
       price2Description: "Double",
       price2: "14.99",
       imageUrl: "https://example.com/burger.jpg",
+      ingredients: "Beef patty, bun, lettuce, tomato",
     });
   });
 
@@ -89,5 +90,32 @@ describe("MenuService.parseMenuItems", () => {
     expect(result[0].title).toBe("Burger");
     expect(result[1].title).toBe("Pizza");
     expect(result[2].title).toBe("Salad");
+  });
+
+  it("parseMenuItems_ShouldIncludeIngredients_WhenRow7IsPresent", () => {
+    const rows = [
+      HEADER_ROW,
+      ["Burger", "Beef burger", "Single", "8.99", "", "", "https://example.com/burger.jpg", "  Beef, bun, lettuce  "],
+    ];
+    const result = service.parseMenuItems(rows);
+    expect(result[0].ingredients).toBe("Beef, bun, lettuce");
+  });
+
+  it("parseMenuItems_ShouldSetIngredientsToUndefined_WhenRow7IsEmpty", () => {
+    const rows = [
+      HEADER_ROW,
+      ["Burger", "Beef burger", "Single", "8.99", "", "", "https://example.com/burger.jpg", ""],
+    ];
+    const result = service.parseMenuItems(rows);
+    expect(result[0].ingredients).toBeUndefined();
+  });
+
+  it("parseMenuItems_ShouldSetIngredientsToUndefined_WhenRowHasFewerThan8Cells", () => {
+    const rows = [
+      HEADER_ROW,
+      ["Burger", "Beef burger", "Single", "8.99", "", "", "https://example.com/burger.jpg"],
+    ];
+    const result = service.parseMenuItems(rows);
+    expect(result[0].ingredients).toBeUndefined();
   });
 });

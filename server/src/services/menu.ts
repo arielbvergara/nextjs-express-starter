@@ -28,6 +28,7 @@ export class MenuService {
         price2Description: row[4]?.trim() || undefined,
         price2: row[5]?.trim() || undefined,
         imageUrl: row[6]?.trim() ?? "",
+        ingredients: row[7]?.trim() || undefined,
       }));
   }
 }

@@ -21,6 +21,9 @@ export const config = {
     refreshToken: process.env.GMAIL_REFRESH_TOKEN || "",
     senderEmail: process.env.GMAIL_SENDER_EMAIL || "",
   },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY || "",
+  },
 } as const;
 
 // Validate required config in production
@@ -32,6 +35,7 @@ if (config.env === "production") {
     "GMAIL_CLIENT_SECRET",
     "GMAIL_REFRESH_TOKEN",
     "GMAIL_SENDER_EMAIL",
+    "GEMINI_API_KEY",
   ];
   const missing = required.filter((key) => !process.env[key]);
   if (missing.length > 0) {
