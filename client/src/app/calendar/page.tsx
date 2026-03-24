@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { InfoBanner } from "@/components/ui/InfoBanner";
+import { WORKING_HOURS_LABEL } from "@/constants/workingHours";
 
 interface CalendarEvent {
   id?: string;
@@ -72,6 +74,7 @@ export default function CalendarPage() {
             + Book Appointment
           </Link>
         </div>
+        <InfoBanner message={WORKING_HOURS_LABEL} />
 
         {loading && (
           <div className="space-y-3">

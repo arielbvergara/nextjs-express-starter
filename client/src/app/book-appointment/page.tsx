@@ -7,6 +7,8 @@ import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { FormField } from "@/components/ui/FormField";
 import { FormSuccessBanner } from "@/components/ui/FormSuccessBanner";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+import { InfoBanner } from "@/components/ui/InfoBanner";
+import { getScheduleForDay, WORKING_HOURS_LABEL } from "@/constants/workingHours";
 
 const SPECIALTIES = [
   "General Practitioner",
@@ -25,6 +27,7 @@ const DURATIONS: { label: string; minutes: number }[] = [
 ];
 
 const INPUT_CLASS = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition-shadow duration-150";
+const INPUT_DISABLED_CLASS = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--muted)] cursor-not-allowed opacity-60";
 
 interface SuccessData {
   summary: string;
@@ -37,12 +40,49 @@ export default function BookAppointmentPage() {
   const [name, setName] = useState("");
   const [specialty, setSpecialty] = useState(SPECIALTIES[0]);
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("09:00");
+  const [time, setTime] = useState("");
+  const [timeMin, setTimeMin] = useState("");
+  const [timeMax, setTimeMax] = useState("");
   const [duration, setDuration] = useState(30);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dateError, setDateError] = useState<string | null>(null);
   const [success, setSuccess] = useState<SuccessData | null>(null);
+
+  function handleDateChange(value: string) {
+    if (!value) {
+      setDate("");
+      setTimeMin("");
+      setTimeMax("");
+      setTime("");
+      setDateError(null);
+      return;
+    }
+
+    const dayOfWeek = new Date(`${value}T12:00:00`).getDay();
+    const schedule = getScheduleForDay(dayOfWeek);
+
+    if (!schedule) {
+      setDateError("We are closed on weekends. Please select a weekday (Mon–Fri).");
+      setDate("");
+      setTimeMin("");
+      setTimeMax("");
+      setTime("");
+      return;
+    }
+
+    setDateError(null);
+    setDate(value);
+    setTimeMin(schedule.start);
+    setTimeMax(schedule.end);
+    setTime((prev) => {
+      if (!prev || prev < schedule.start || prev > schedule.end) {
+        return schedule.start;
+      }
+      return prev;
+    });
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -126,6 +166,9 @@ export default function BookAppointmentPage() {
             Book Appointment
           </h1>
           <p className="mt-1 text-[var(--muted)]">Schedule a doctor appointment and block your calendar</p>
+          <div className="mt-3">
+            <InfoBanner message={WORKING_HOURS_LABEL} />
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm space-y-5">
@@ -159,18 +202,32 @@ export default function BookAppointmentPage() {
                 required
                 value={date}
                 min={new Date().toISOString().split("T")[0]}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => handleDateChange(e.target.value)}
                 className={INPUT_CLASS}
               />
+              {dateError && (
+                <p className="mt-1 text-xs text-[var(--error)]">{dateError}</p>
+              )}
             </FormField>
             <FormField label="Time" required>
-              <input
-                type="time"
-                required
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className={INPUT_CLASS}
-              />
+              {date ? (
+                <input
+                  type="time"
+                  required
+                  value={time}
+                  min={timeMin}
+                  max={timeMax}
+                  onChange={(e) => setTime(e.target.value)}
+                  className={INPUT_CLASS}
+                />
+              ) : (
+                <input
+                  type="time"
+                  disabled
+                  placeholder="Select a date first"
+                  className={INPUT_DISABLED_CLASS}
+                />
+              )}
             </FormField>
           </div>
 
