@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { api } from "@/lib/api";
 import type { MenuItem } from "@/types";
+import { MenuChatbot } from "@/components/ui/MenuChatbot";
 
 export default function MenuPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -111,6 +112,7 @@ export default function MenuPage() {
           </Link>
         </div>
       </div>
+      <MenuChatbot />
     </main>
   );
 }
