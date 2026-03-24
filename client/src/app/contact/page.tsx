@@ -37,7 +37,7 @@ export default function ContactPage() {
             <div className="text-4xl mb-3">📩</div>
             <h1 className="text-2xl font-bold text-green-800 mb-2">Message Received!</h1>
             <p className="text-green-700 mb-6">
-              Thanks, <strong>{name}</strong>! Your contact request has been registered. We'll get back to you at{" "}
+              Thanks, <strong>{name}</strong>! Your contact request has been registered. We&apos;ll get back to you at{" "}
               <strong>{email}</strong> shortly.
             </p>
             <div className="flex gap-3 justify-center">
