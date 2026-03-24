@@ -15,3 +15,11 @@ export const WORKING_HOURS_LABEL =
 export function getScheduleForDay(day: number): DaySchedule | null {
   return WORKING_HOURS.find((schedule) => schedule.days.includes(day)) ?? null;
 }
+
+export function generateHourlySlots(schedule: Pick<DaySchedule, "start" | "end">): string[] {
+  const startH = parseInt(schedule.start.split(":")[0], 10);
+  const endH = parseInt(schedule.end.split(":")[0], 10);
+  return Array.from({ length: endH - startH }, (_, i) =>
+    String(startH + i).padStart(2, "0") + ":00"
+  );
+}

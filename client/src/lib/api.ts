@@ -50,8 +50,14 @@ export interface SendEmailPayload {
 
 // ── Calendar ─────────────────────────────────────────
 export const calendar = {
-  listEvents: (maxResults = 10) =>
-    request(`/calendar/events?maxResults=${maxResults}`),
+  listEvents: (maxResults = 10, date?: string) => {
+    const params = new URLSearchParams({ maxResults: String(maxResults) });
+    if (date) {
+      params.set("timeMin", `${date}T00:00:00.000Z`);
+      params.set("timeMax", `${date}T23:59:59.999Z`);
+    }
+    return request(`/calendar/events?${params}`);
+  },
   createEvent: (event: CreateEventPayload) =>
     request("/calendar/events", { method: "POST", body: JSON.stringify(event) }),
 };
