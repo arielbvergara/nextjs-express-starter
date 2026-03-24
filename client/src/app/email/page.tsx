@@ -3,6 +3,10 @@
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { api, SendEmailPayload } from "@/lib/api";
+import { ErrorAlert } from "@/components/ui/ErrorAlert";
+import { FormField } from "@/components/ui/FormField";
+import { FormSuccessBanner } from "@/components/ui/FormSuccessBanner";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 
 export default function EmailPage() {
   const [to, setTo] = useState("");
@@ -28,38 +32,28 @@ export default function EmailPage() {
     }
   }
 
+  function handleReset() {
+    setSuccess(false);
+    setTo("");
+    setSubject("");
+    setBody("");
+  }
+
   if (success) {
     return (
-      <main className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-lg mx-auto">
-          <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center">
-            <div className="text-4xl mb-3">✉️</div>
-            <h1 className="text-2xl font-bold text-green-800 mb-2">Email Sent!</h1>
-            <p className="text-green-700 mb-6">
-              Your email to <strong>{to}</strong> was sent successfully.
-            </p>
-            <div className="flex gap-3 justify-center">
-              <button
-                onClick={() => {
-                  setSuccess(false);
-                  setTo("");
-                  setSubject("");
-                  setBody("");
-                }}
-                className="rounded-lg border border-green-300 px-4 py-2 text-sm text-green-700 hover:bg-green-100 transition-colors"
-              >
-                Send another
-              </button>
-              <Link
-                href="/"
-                className="rounded-lg bg-green-700 px-4 py-2 text-sm text-white hover:bg-green-800 transition-colors"
-              >
-                Back to home
-              </Link>
-            </div>
-          </div>
-        </div>
-      </main>
+      <FormSuccessBanner
+        emoji="✉️"
+        title="Email Sent!"
+        message={
+          <>
+            Your email to <strong>{to}</strong> was sent successfully.
+          </>
+        }
+        onReset={handleReset}
+        resetLabel="Send another"
+        backHref="/"
+        backLabel="Back to home"
+      />
     );
   }
 
@@ -77,10 +71,7 @@ export default function EmailPage() {
           onSubmit={handleSubmit}
           className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm space-y-5"
         >
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              To <span className="text-red-500">*</span>
-            </label>
+          <FormField label="To" required>
             <input
               type="email"
               required
@@ -89,12 +80,9 @@ export default function EmailPage() {
               placeholder="recipient@example.com"
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Subject <span className="text-red-500">*</span>
-            </label>
+          <FormField label="Subject" required>
             <input
               type="text"
               required
@@ -103,12 +91,9 @@ export default function EmailPage() {
               placeholder="Hello from the starter!"
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Body <span className="text-red-500">*</span>
-            </label>
+          <FormField label="Body" required>
             <textarea
               required
               value={body}
@@ -117,21 +102,11 @@ export default function EmailPage() {
               rows={5}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
-          </div>
+          </FormField>
 
-          {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+          <ErrorAlert error={error} />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? "Sending…" : "Send Email"}
-          </button>
+          <SubmitButton loading={loading} label="Send Email" loadingLabel="Sending…" />
         </form>
 
         <div className="mt-6">
