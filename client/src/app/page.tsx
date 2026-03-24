@@ -20,7 +20,7 @@ export default function Home() {
             Dashboard
           </Link>
           <a
-            href="https://github.com"
+            href="https://github.com/arielbvergara/nextjs-express-starter/blob/main/README.md"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-lg border border-[var(--border)] px-6 py-3 font-medium hover:bg-[var(--border)] transition-colors"
