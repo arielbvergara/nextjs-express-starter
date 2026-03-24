@@ -191,23 +191,16 @@ export default function BookAppointmentPage() {
               />
             </FormField>
             <FormField label="Time" required>
-              {date ? (
-                <input
-                  type="time"
-                  required
-                  value={time}
-                  min={timeMin}
-                  max={timeMax}
-                  onChange={(e) => setTime(e.target.value)}
-                  className={INPUT_CLASS}
-                />
-              ) : (
-                <input
-                  type="time"
-                  disabled
-                  className={INPUT_DISABLED_CLASS}
-                />
-              )}
+              <input
+                type="time"
+                required
+                disabled={!date}
+                value={time}
+                min={timeMin}
+                max={timeMax}
+                onChange={(e) => setTime(e.target.value)}
+                className={date ? INPUT_CLASS : INPUT_DISABLED_CLASS}
+              />
             </FormField>
           </div>
 
