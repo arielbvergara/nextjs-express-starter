@@ -1,6 +1,6 @@
 # nextjs-express-starter
 
-A full-stack monorepo with **Next.js** (frontend) + **Express** (backend API), pre-configured with Google services integration via a **service account** — no user login required.
+A full-stack monorepo with **Next.js** (frontend) + **Express** (backend API), pre-configured with Google services integration — Calendar, Sheets, Drive via a **service account**, and Gmail for transactional email via **OAuth2**.
 
 ## Tech Stack
 
@@ -8,8 +8,8 @@ A full-stack monorepo with **Next.js** (frontend) + **Express** (backend API), p
 | ----------- | ------------------------------------ |
 | Frontend    | Next.js 16, React 19, TypeScript     |
 | Backend     | Express 5, TypeScript, Node 20       |
-| Auth        | Google Service Account               |
-| Google APIs | Calendar, Sheets, Drive              |
+| Auth        | Google Service Account + Gmail OAuth2 |
+| Google APIs | Calendar, Sheets, Drive, Gmail       |
 | Package Mgr | pnpm (workspaces)                    |
 | Containers  | Docker & Docker Compose              |
 
@@ -50,7 +50,7 @@ A full-stack monorepo with **Next.js** (frontend) + **Express** (backend API), p
 ### 1. Clone & Install
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/arielbvergara/nextjs-express-starter.git
 cd nextjs-express-starter
 pnpm install
 ```
@@ -58,10 +58,10 @@ pnpm install
 ### 2. Configure Environment
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Edit `.env` with your credentials. See [Google Cloud Setup](#google-cloud-setup) below.
+Edit `.env.local` with your credentials. See [Google Cloud Setup](#google-cloud-setup) and [Gmail OAuth2 Setup](#gmail-oauth2-setup) below.
 
 ### 3. Run Development
 
@@ -88,13 +88,19 @@ PORT=4000
 CLIENT_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
 
-# Google Service Account
+# Google Service Account (Calendar, Sheets, Drive)
 GOOGLE_SERVICE_ACCOUNT_EMAIL=your-sa@your-project.iam.gserviceaccount.com
 GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
 # Resource IDs
 GOOGLE_CALENDAR_ID=your-calendar-id@group.calendar.google.com
 GOOGLE_SHEETS_ID=your-spreadsheet-id
+
+# Gmail OAuth2 (transactional email)
+GMAIL_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GMAIL_CLIENT_SECRET=your-client-secret
+GMAIL_REFRESH_TOKEN=your-refresh-token
+GMAIL_SENDER_EMAIL=your-gmail-address@gmail.com
 ```
 
 ## Google Cloud Setup
@@ -108,10 +114,26 @@ GOOGLE_SHEETS_ID=your-spreadsheet-id
 4. Create a **Service Account**:
    - Go to **IAM & Admin → Service Accounts**
    - Click **Create Service Account**
-   - Generate a JSON key and copy the `client_email` and `private_key` into your `.env`
+   - Generate a JSON key and copy the `client_email` and `private_key` into your `.env.local`
 5. Share your resources with the service account email:
    - **Google Calendar**: open calendar settings → share with the service account email (give it "Make changes to events" permission)
    - **Google Sheet**: click Share → add the service account email as an Editor
+
+## Gmail OAuth2 Setup
+
+The Gmail integration uses OAuth2 user credentials (not a service account) to send email on behalf of a real Gmail account.
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), enable the **Gmail API**
+2. Go to **APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID**
+   - Application type: **Web application**
+   - Authorized redirect URI: `https://developers.google.com/oauthplayground`
+3. Go to **APIs & Services → OAuth consent screen**
+   - Add your Gmail address as a **Test user**
+4. Open [OAuth2 Playground](https://developers.google.com/oauthplayground)
+   - Click the gear icon → enable **Use your own OAuth credentials** → paste your Client ID and Secret
+   - Authorize the scope: `https://www.googleapis.com/auth/gmail.send`
+   - Exchange the authorization code for tokens and copy the **Refresh token**
+5. Add all four values to your `.env.local`
 
 ## API Endpoints
 
@@ -119,9 +141,9 @@ All endpoints are prefixed with `/api`.
 
 ### Health
 
-| Method | Path           | Description        |
-| ------ | -------------- | ------------------ |
-| `GET`  | `/health`      | Health check       |
+| Method | Path      | Description  |
+| ------ | --------- | ------------ |
+| `GET`  | `/health` | Health check |
 
 ### Calendar
 
@@ -132,17 +154,23 @@ All endpoints are prefixed with `/api`.
 
 ### Sheets
 
-| Method | Path                      | Description                              |
-| ------ | ------------------------- | ---------------------------------------- |
-| `GET`  | `/sheets/:spreadsheetId`  | Read spreadsheet data. Query: `range` (default: Sheet1) |
-| `POST` | `/sheets/rows`            | Append a row to `GOOGLE_SHEETS_ID`. Body: `{ name, email, phone?, message }`. Writes: `[timestamp, name, email, phone, message]` |
+| Method | Path                     | Description                              |
+| ------ | ------------------------ | ---------------------------------------- |
+| `GET`  | `/sheets/:spreadsheetId` | Read spreadsheet data. Query: `range` (default: Sheet1) |
+| `POST` | `/sheets/rows`           | Append a row to `GOOGLE_SHEETS_ID`. Body: `{ name, email, phone?, message }`. Writes: `[timestamp, name, email, phone, message]` |
 
 ### Drive
 
-| Method | Path                    | Description             |
-| ------ | ----------------------- | ----------------------- |
-| `GET`  | `/drive/files`          | List files. Query: `pageSize` (default: 20), `q` (search) |
-| `GET`  | `/drive/files/:fileId`  | Download a file         |
+| Method | Path                   | Description             |
+| ------ | ---------------------- | ----------------------- |
+| `GET`  | `/drive/files`         | List files. Query: `pageSize` (default: 20), `q` (search) |
+| `GET`  | `/drive/files/:fileId` | Download a file         |
+
+### Email
+
+| Method | Path           | Description                              |
+| ------ | -------------- | ---------------------------------------- |
+| `POST` | `/email/send`  | Send an email via Gmail API. Body: `{ to, subject, body }` |
 
 ## Rate Limiting & Cache
 
@@ -154,27 +182,29 @@ All endpoints are prefixed with `/api`.
 
 ## Example Pages
 
-Three usage example pages are included to demonstrate all services end-to-end:
+Four usage example pages are included to demonstrate all services end-to-end:
 
-| Page                 | Route                | Description                                          |
-| -------------------- | -------------------- | ---------------------------------------------------- |
-| Calendar Events      | `/calendar`          | Lists upcoming events from `GOOGLE_CALENDAR_ID`      |
-| Book an Appointment  | `/book-appointment`  | Form that creates a doctor appointment in the calendar |
-| Contact Us           | `/contact`           | Form that appends a row to `GOOGLE_SHEETS_ID`         |
+| Page                | Route               | Description                                            |
+| ------------------- | ------------------- | ------------------------------------------------------ |
+| Calendar Events     | `/calendar`         | Lists upcoming events from `GOOGLE_CALENDAR_ID`        |
+| Book an Appointment | `/book-appointment` | Form that creates a doctor appointment in the calendar |
+| Contact Us          | `/contact`          | Form that appends a row to `GOOGLE_SHEETS_ID`          |
+| Send Email          | `/email`            | Form that sends a transactional email via the Gmail API |
 
 ## Scripts
 
-| Command             | Description                        |
-| ------------------- | ---------------------------------- |
-| `pnpm dev`          | Run client + server in dev mode    |
-| `pnpm dev:client`   | Run Next.js dev server             |
-| `pnpm dev:server`   | Run Express dev server             |
-| `pnpm build`        | Build both client and server       |
-| `pnpm build:client` | Build Next.js                      |
-| `pnpm build:server` | Build Express                      |
-| `pnpm start`        | Start production builds            |
-| `pnpm lint`         | Lint both projects                 |
-| `pnpm type-check`   | TypeScript check both projects     |
+| Command               | Description                        |
+| --------------------- | ---------------------------------- |
+| `pnpm dev`            | Run client + server in dev mode    |
+| `pnpm dev:client`     | Run Next.js dev server             |
+| `pnpm dev:server`     | Run Express dev server             |
+| `pnpm build`          | Build both client and server       |
+| `pnpm build:client`   | Build Next.js                      |
+| `pnpm build:server`   | Build Express                      |
+| `pnpm start`          | Start production builds            |
+| `pnpm lint`           | Lint both projects                 |
+| `pnpm type-check`     | TypeScript check both projects     |
+| `pnpm test`           | Run server unit tests              |
 
 ## License
 

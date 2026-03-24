@@ -15,6 +15,12 @@ export const config = {
     calendarId: process.env.GOOGLE_CALENDAR_ID || "primary",
     sheetsId: process.env.GOOGLE_SHEETS_ID || "",
   },
+  gmail: {
+    clientId: process.env.GMAIL_CLIENT_ID || "",
+    clientSecret: process.env.GMAIL_CLIENT_SECRET || "",
+    refreshToken: process.env.GMAIL_REFRESH_TOKEN || "",
+    senderEmail: process.env.GMAIL_SENDER_EMAIL || "",
+  },
 } as const;
 
 // Validate required config in production
@@ -22,6 +28,10 @@ if (config.env === "production") {
   const required = [
     "GOOGLE_SERVICE_ACCOUNT_EMAIL",
     "GOOGLE_PRIVATE_KEY",
+    "GMAIL_CLIENT_ID",
+    "GMAIL_CLIENT_SECRET",
+    "GMAIL_REFRESH_TOKEN",
+    "GMAIL_SENDER_EMAIL",
   ];
   const missing = required.filter((key) => !process.env[key]);
   if (missing.length > 0) {

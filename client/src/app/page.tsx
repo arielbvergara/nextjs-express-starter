@@ -8,8 +8,8 @@ export default function Home() {
           nextjs-express-starter
         </h1>
         <p className="text-lg text-[var(--muted)]">
-          Next.js + Express with Google Calendar, Sheets &amp; Drive
-          pre-configured via service account.
+          Next.js + Express with Google Calendar, Sheets, Drive &amp; Gmail
+          pre-configured.
         </p>
 
         <div className="flex gap-4 justify-center">
@@ -20,7 +20,7 @@ export default function Home() {
             Dashboard
           </Link>
           <a
-            href="https://github.com"
+            href="https://github.com/arielbvergara/nextjs-express-starter/blob/main/README.md"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-lg border border-[var(--border)] px-6 py-3 font-medium hover:bg-[var(--border)] transition-colors"
@@ -46,6 +46,10 @@ export default function Home() {
             {
               title: "Service Account",
               desc: "Server-side auth — no user login required",
+            },
+            {
+              title: "Gmail API",
+              desc: "Send transactional emails via OAuth2 user credentials",
             },
           ].map((feature) => (
             <div
@@ -81,6 +85,12 @@ export default function Home() {
                 label: "Contact Us",
                 desc: "Submit a contact request — appends a row to a Google Sheet",
                 icon: "📋",
+              },
+              {
+                href: "/email",
+                label: "Send Email",
+                desc: "Send a transactional email via the Gmail API using OAuth2",
+                icon: "✉️",
               },
             ].map((example) => (
               <Link
