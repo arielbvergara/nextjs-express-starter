@@ -11,11 +11,14 @@ export class CalendarService {
 
   async listEvents(
     maxResults = 10,
-    calendarId = "primary"
+    calendarId = "primary",
+    timeMin?: string,
+    timeMax?: string
   ): Promise<calendar_v3.Schema$Event[]> {
     const response = await this.calendar.events.list({
       calendarId,
-      timeMin: new Date().toISOString(),
+      timeMin: timeMin ?? new Date().toISOString(),
+      timeMax,
       maxResults,
       singleEvents: true,
       orderBy: "startTime",

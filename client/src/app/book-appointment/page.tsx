@@ -7,6 +7,10 @@ import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { FormField } from "@/components/ui/FormField";
 import { FormSuccessBanner } from "@/components/ui/FormSuccessBanner";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+import { InfoBanner } from "@/components/ui/InfoBanner";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { TimeSlotPicker, TimeSlot } from "@/components/ui/TimeSlotPicker";
+import { WORKING_HOURS_LABEL, generateHourlySlots } from "@/constants/workingHours";
 
 const SPECIALTIES = [
   "General Practitioner",
@@ -26,6 +30,8 @@ const DURATIONS: { label: string; minutes: number }[] = [
 
 const INPUT_CLASS = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition-shadow duration-150";
 
+const SLOT_DURATION_HOURS = 1;
+
 interface SuccessData {
   summary: string;
   start: string;
@@ -33,16 +39,67 @@ interface SuccessData {
   htmlLink?: string;
 }
 
+function slotIsBooked(
+  slotTime: string,
+  date: string,
+  events: { start?: { dateTime?: string }; end?: { dateTime?: string } }[]
+): boolean {
+  const [hours, minutes] = slotTime.split(":").map(Number);
+  const slotStart = new Date(`${date}T${slotTime}:00`);
+  slotStart.setHours(hours, minutes, 0, 0);
+  const slotEnd = new Date(slotStart.getTime() + SLOT_DURATION_HOURS * 60 * 60 * 1000);
+
+  return events.some((event) => {
+    const eventStart = event.start?.dateTime ? new Date(event.start.dateTime) : null;
+    const eventEnd = event.end?.dateTime ? new Date(event.end.dateTime) : null;
+    if (!eventStart || !eventEnd) return false;
+    return eventStart < slotEnd && eventEnd > slotStart;
+  });
+}
+
 export default function BookAppointmentPage() {
   const [name, setName] = useState("");
   const [specialty, setSpecialty] = useState(SPECIALTIES[0]);
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("09:00");
+  const [time, setTime] = useState("");
+  const [slots, setSlots] = useState<TimeSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
   const [duration, setDuration] = useState(30);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<SuccessData | null>(null);
+
+  async function handleDateChange(
+    value: string,
+    schedule: { start: string; end: string } | null
+  ) {
+    setDate(value);
+    setTime("");
+    setSlots([]);
+
+    if (!value || !schedule) return;
+
+    const slotTimes = generateHourlySlots(schedule);
+    setSlotsLoading(true);
+
+    const res = await api.calendar.listEvents(50, value);
+    setSlotsLoading(false);
+
+    const events = (res.success && Array.isArray(res.data) ? res.data : []) as {
+      start?: { dateTime?: string };
+      end?: { dateTime?: string };
+    }[];
+
+    const builtSlots: TimeSlot[] = slotTimes.map((t) => ({
+      time: t,
+      booked: slotIsBooked(t, value, events),
+    }));
+
+    setSlots(builtSlots);
+    const firstAvailable = builtSlots.find((s) => !s.booked);
+    setTime(firstAvailable?.time ?? "");
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -126,6 +183,9 @@ export default function BookAppointmentPage() {
             Book Appointment
           </h1>
           <p className="mt-1 text-[var(--muted)]">Schedule a doctor appointment and block your calendar</p>
+          <div className="mt-3">
+            <InfoBanner message={WORKING_HOURS_LABEL} />
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm space-y-5">
@@ -154,22 +214,19 @@ export default function BookAppointmentPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Date" required>
-              <input
-                type="date"
-                required
+              <DatePicker
                 value={date}
-                min={new Date().toISOString().split("T")[0]}
-                onChange={(e) => setDate(e.target.value)}
-                className={INPUT_CLASS}
+                onChange={handleDateChange}
+                min={new Date()}
+                required
               />
             </FormField>
             <FormField label="Time" required>
-              <input
-                type="time"
-                required
+              <TimeSlotPicker
+                slots={slots}
                 value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className={INPUT_CLASS}
+                onChange={setTime}
+                loading={slotsLoading}
               />
             </FormField>
           </div>

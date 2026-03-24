@@ -12,7 +12,9 @@ export async function listEvents(
 ): Promise<void> {
   try {
     const maxResults = parseInt(req.query.maxResults as string) || 10;
-    const cacheKey = `calendar:events:${maxResults}`;
+    const timeMin = req.query.timeMin as string | undefined;
+    const timeMax = req.query.timeMax as string | undefined;
+    const cacheKey = `calendar:events:${maxResults}:${timeMin ?? ""}:${timeMax ?? ""}`;
 
     const cached = cache.get(cacheKey);
     if (cached) {
@@ -21,7 +23,7 @@ export async function listEvents(
     }
 
     const calendarService = new CalendarService(googleAuth);
-    const events = await calendarService.listEvents(maxResults, config.google.calendarId);
+    const events = await calendarService.listEvents(maxResults, config.google.calendarId, timeMin, timeMax);
 
     cache.set(cacheKey, events);
     res.json({ success: true, data: events });
