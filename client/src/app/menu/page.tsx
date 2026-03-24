@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/lib/api";
 import type { MenuItem } from "@/types";
 
@@ -49,11 +50,12 @@ export default function MenuPage() {
                 className="rounded-xl border border-[var(--border)] overflow-hidden flex flex-col"
               >
                 {item.imageUrl ? (
-                  <div className="aspect-video overflow-hidden bg-[var(--border)]">
-                    <img
+                  <div className="aspect-video overflow-hidden bg-[var(--border)] relative">
+                    <Image
                       src={item.imageUrl}
                       alt={item.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   </div>
                 ) : (
