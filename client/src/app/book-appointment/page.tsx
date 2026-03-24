@@ -9,7 +9,8 @@ import { FormSuccessBanner } from "@/components/ui/FormSuccessBanner";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { InfoBanner } from "@/components/ui/InfoBanner";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { WORKING_HOURS_LABEL } from "@/constants/workingHours";
+import { TimeSlotPicker, TimeSlot } from "@/components/ui/TimeSlotPicker";
+import { WORKING_HOURS_LABEL, generateHourlySlots } from "@/constants/workingHours";
 
 const SPECIALTIES = [
   "General Practitioner",
@@ -28,7 +29,8 @@ const DURATIONS: { label: string; minutes: number }[] = [
 ];
 
 const INPUT_CLASS = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition-shadow duration-150";
-const INPUT_DISABLED_CLASS = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--muted)] cursor-not-allowed opacity-60";
+
+const SLOT_DURATION_HOURS = 1;
 
 interface SuccessData {
   summary: string;
@@ -37,37 +39,66 @@ interface SuccessData {
   htmlLink?: string;
 }
 
+function slotIsBooked(
+  slotTime: string,
+  date: string,
+  events: { start?: { dateTime?: string }; end?: { dateTime?: string } }[]
+): boolean {
+  const [hours, minutes] = slotTime.split(":").map(Number);
+  const slotStart = new Date(`${date}T${slotTime}:00`);
+  slotStart.setHours(hours, minutes, 0, 0);
+  const slotEnd = new Date(slotStart.getTime() + SLOT_DURATION_HOURS * 60 * 60 * 1000);
+
+  return events.some((event) => {
+    const eventStart = event.start?.dateTime ? new Date(event.start.dateTime) : null;
+    const eventEnd = event.end?.dateTime ? new Date(event.end.dateTime) : null;
+    if (!eventStart || !eventEnd) return false;
+    return eventStart < slotEnd && eventEnd > slotStart;
+  });
+}
+
 export default function BookAppointmentPage() {
   const [name, setName] = useState("");
   const [specialty, setSpecialty] = useState(SPECIALTIES[0]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [timeMin, setTimeMin] = useState("");
-  const [timeMax, setTimeMax] = useState("");
+  const [slots, setSlots] = useState<TimeSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
   const [duration, setDuration] = useState(30);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<SuccessData | null>(null);
 
-  function handleDateChange(
+  async function handleDateChange(
     value: string,
     schedule: { start: string; end: string } | null
   ) {
     setDate(value);
-    if (!value || !schedule) {
-      setTimeMin("");
-      setTimeMax("");
-      setTime("");
-      return;
-    }
-    setTimeMin(schedule.start);
-    setTimeMax(schedule.end);
-    setTime((prev) =>
-      !prev || prev < schedule.start || prev > schedule.end
-        ? schedule.start
-        : prev
-    );
+    setTime("");
+    setSlots([]);
+
+    if (!value || !schedule) return;
+
+    const slotTimes = generateHourlySlots(schedule);
+    setSlotsLoading(true);
+
+    const res = await api.calendar.listEvents(50, value);
+    setSlotsLoading(false);
+
+    const events = (res.success && Array.isArray(res.data) ? res.data : []) as {
+      start?: { dateTime?: string };
+      end?: { dateTime?: string };
+    }[];
+
+    const builtSlots: TimeSlot[] = slotTimes.map((t) => ({
+      time: t,
+      booked: slotIsBooked(t, value, events),
+    }));
+
+    setSlots(builtSlots);
+    const firstAvailable = builtSlots.find((s) => !s.booked);
+    setTime(firstAvailable?.time ?? "");
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -191,15 +222,11 @@ export default function BookAppointmentPage() {
               />
             </FormField>
             <FormField label="Time" required>
-              <input
-                type="time"
-                required
-                disabled={!date}
+              <TimeSlotPicker
+                slots={slots}
                 value={time}
-                min={timeMin}
-                max={timeMax}
-                onChange={(e) => setTime(e.target.value)}
-                className={date ? INPUT_CLASS : INPUT_DISABLED_CLASS}
+                onChange={setTime}
+                loading={slotsLoading}
               />
             </FormField>
           </div>
