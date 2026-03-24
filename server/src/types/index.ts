@@ -46,6 +46,7 @@ export interface MenuItem {
   price2Description?: string;
   price2?: string;
   imageUrl: string;
+  ingredients?: string;
 }
 
 export interface ApiResponse<T = unknown> {
