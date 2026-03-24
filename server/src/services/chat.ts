@@ -3,7 +3,7 @@ import { GoogleAuth } from "google-auth-library";
 import { MenuItem } from "../types";
 import { MenuService } from "./menu";
 
-const GEMINI_MODEL = "gemini-1.5-flash";
+const GEMINI_MODEL = "gemini-2.5-flash";
 const MAX_REPLY_LENGTH = 2000;
 const QUOTA_EXCEEDED_PATTERN = /quota exceeded/i;
 const RATE_LIMIT_PATTERN = /rate limit|resource exhausted/i;
