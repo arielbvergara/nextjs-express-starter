@@ -10,10 +10,10 @@ interface FormFieldProps {
 export function FormField({ label, required, optional, children }: FormFieldProps) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
         {label}{" "}
-        {required && <span className="text-red-500">*</span>}
-        {optional && <span className="text-gray-400 font-normal">(optional)</span>}
+        {required && <span className="text-[var(--error)]">*</span>}
+        {optional && <span className="text-[var(--muted)] font-normal">(optional)</span>}
       </label>
       {children}
     </div>

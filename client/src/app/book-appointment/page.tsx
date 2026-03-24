@@ -24,6 +24,8 @@ const DURATIONS: { label: string; minutes: number }[] = [
   { label: "90 minutes", minutes: 90 },
 ];
 
+const INPUT_CLASS = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition-shadow duration-150";
+
 interface SuccessData {
   summary: string;
   start: string;
@@ -76,7 +78,6 @@ export default function BookAppointmentPage() {
   if (success) {
     return (
       <FormSuccessBanner
-        emoji="✅"
         title="Appointment Booked!"
         message={<strong>{success.summary}</strong>}
         onReset={() => setSuccess(null)}
@@ -84,7 +85,7 @@ export default function BookAppointmentPage() {
         backHref="/calendar"
         backLabel="View calendar"
       >
-        <p className="text-sm text-green-600 mb-1">
+        <p className="text-sm text-[var(--success)] mb-1">
           {new Date(success.start).toLocaleString("en-US", {
             weekday: "long",
             month: "long",
@@ -93,7 +94,7 @@ export default function BookAppointmentPage() {
             minute: "2-digit",
           })}
         </p>
-        <p className="text-xs text-green-500 mb-6">
+        <p className="text-xs text-[var(--muted)] mb-6">
           until{" "}
           {new Date(success.end).toLocaleTimeString("en-US", {
             hour: "numeric",
@@ -105,7 +106,7 @@ export default function BookAppointmentPage() {
             href={success.htmlLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block mb-4 text-sm text-blue-600 underline"
+            className="inline-block mb-4 text-sm text-[var(--accent)] underline"
           >
             View in Google Calendar →
           </a>
@@ -115,14 +116,19 @@ export default function BookAppointmentPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12 px-4">
+    <main className="min-h-[calc(100vh-4rem)] bg-[var(--background)] py-12 px-4">
       <div className="max-w-lg mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Book Appointment</h1>
-          <p className="mt-1 text-gray-500">Schedule a doctor appointment and block your calendar</p>
+          <h1
+            className="text-3xl font-bold text-[var(--foreground)]"
+            style={{ fontFamily: "var(--font-family-heading)" }}
+          >
+            Book Appointment
+          </h1>
+          <p className="mt-1 text-[var(--muted)]">Schedule a doctor appointment and block your calendar</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm space-y-5">
+        <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm space-y-5">
           <FormField label="Patient Name" required>
             <input
               type="text"
@@ -130,7 +136,7 @@ export default function BookAppointmentPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Jane Doe"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={INPUT_CLASS}
             />
           </FormField>
 
@@ -138,7 +144,7 @@ export default function BookAppointmentPage() {
             <select
               value={specialty}
               onChange={(e) => setSpecialty(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={INPUT_CLASS}
             >
               {SPECIALTIES.map((s) => (
                 <option key={s}>{s}</option>
@@ -154,7 +160,7 @@ export default function BookAppointmentPage() {
                 value={date}
                 min={new Date().toISOString().split("T")[0]}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={INPUT_CLASS}
               />
             </FormField>
             <FormField label="Time" required>
@@ -163,7 +169,7 @@ export default function BookAppointmentPage() {
                 required
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={INPUT_CLASS}
               />
             </FormField>
           </div>
@@ -172,7 +178,7 @@ export default function BookAppointmentPage() {
             <select
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={INPUT_CLASS}
             >
               {DURATIONS.map((d) => (
                 <option key={d.minutes} value={d.minutes}>{d.label}</option>
@@ -186,7 +192,7 @@ export default function BookAppointmentPage() {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional notes or reason for visit…"
               rows={3}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className={INPUT_CLASS + " resize-none"}
             />
           </FormField>
 
@@ -196,7 +202,7 @@ export default function BookAppointmentPage() {
         </form>
 
         <div className="mt-6">
-          <Link href="/" className="text-sm text-gray-400 hover:text-gray-600">
+          <Link href="/" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors duration-150">
             ← Back to home
           </Link>
         </div>

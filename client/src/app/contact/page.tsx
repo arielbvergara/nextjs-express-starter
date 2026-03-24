@@ -8,6 +8,8 @@ import { FormField } from "@/components/ui/FormField";
 import { FormSuccessBanner } from "@/components/ui/FormSuccessBanner";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 
+const INPUT_CLASS = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition-shadow duration-150";
+
 export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -44,7 +46,6 @@ export default function ContactPage() {
   if (success) {
     return (
       <FormSuccessBanner
-        emoji="📩"
         title="Message Received!"
         message={
           <>
@@ -61,16 +62,21 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12 px-4">
+    <main className="min-h-[calc(100vh-4rem)] bg-[var(--background)] py-12 px-4">
       <div className="max-w-lg mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Contact Us</h1>
-          <p className="mt-1 text-gray-500">
+          <h1
+            className="text-3xl font-bold text-[var(--foreground)]"
+            style={{ fontFamily: "var(--font-family-heading)" }}
+          >
+            Contact Us
+          </h1>
+          <p className="mt-1 text-[var(--muted)]">
             Send us a message — your request will be logged to a Google Sheet
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm space-y-5">
+        <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm space-y-5">
           <FormField label="Full Name" required>
             <input
               type="text"
@@ -78,7 +84,7 @@ export default function ContactPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Jane Doe"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={INPUT_CLASS}
             />
           </FormField>
 
@@ -89,7 +95,7 @@ export default function ContactPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="jane@example.com"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={INPUT_CLASS}
             />
           </FormField>
 
@@ -99,7 +105,7 @@ export default function ContactPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+1 (555) 000-0000"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={INPUT_CLASS}
             />
           </FormField>
 
@@ -110,7 +116,7 @@ export default function ContactPage() {
               onChange={(e) => setMessage(e.target.value)}
               placeholder="How can we help you?"
               rows={4}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className={INPUT_CLASS + " resize-none"}
             />
           </FormField>
 
@@ -120,7 +126,7 @@ export default function ContactPage() {
         </form>
 
         <div className="mt-6">
-          <Link href="/" className="text-sm text-gray-400 hover:text-gray-600">
+          <Link href="/" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors duration-150">
             ← Back to home
           </Link>
         </div>

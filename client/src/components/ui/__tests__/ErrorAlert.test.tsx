@@ -16,6 +16,6 @@ describe("ErrorAlert", () => {
   it("render_ShouldApplyErrorStyles_WhenErrorIsProvided", () => {
     render(<ErrorAlert error="Invalid email" />);
     const alert = screen.getByText("Invalid email");
-    expect(alert).toHaveClass("text-red-700");
+    expect(alert).toHaveClass("text-[var(--error)]");
   });
 });
