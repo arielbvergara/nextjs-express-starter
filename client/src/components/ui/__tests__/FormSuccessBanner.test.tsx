@@ -9,7 +9,6 @@ vi.mock("next/link", () => ({
 }));
 
 const DEFAULT_PROPS = {
-  emoji: "✉️",
   title: "Email Sent!",
   message: "Your email was sent successfully.",
   onReset: vi.fn(),
@@ -19,9 +18,9 @@ const DEFAULT_PROPS = {
 };
 
 describe("FormSuccessBanner", () => {
-  it("render_ShouldDisplayEmoji_WhenRendered", () => {
+  it("render_ShouldDisplaySuccessIcon_WhenRendered", () => {
     render(<FormSuccessBanner {...DEFAULT_PROPS} />);
-    expect(screen.getByText("✉️")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Success" })).toBeInTheDocument();
   });
 
   it("render_ShouldDisplayTitle_WhenRendered", () => {
