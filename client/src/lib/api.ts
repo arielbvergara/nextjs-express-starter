@@ -88,5 +88,19 @@ export const menu = {
   list: () => request<MenuItem[]>("/menu"),
 };
 
-export const api = { calendar, sheets, drive, email, menu };
+// ── Chat ──────────────────────────────────────────────
+export interface ChatMessagePayload {
+  message: string;
+}
+
+export interface ChatReply {
+  reply: string;
+}
+
+export const chat = {
+  send: (payload: ChatMessagePayload) =>
+    request<ChatReply>("/chat", { method: "POST", body: JSON.stringify(payload) }),
+};
+
+export const api = { calendar, sheets, drive, email, menu, chat };
 export default api;
