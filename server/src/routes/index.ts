@@ -4,6 +4,7 @@ import sheetsRoutes from "./sheets";
 import driveRoutes from "./drive";
 import emailRoutes from "./email";
 import menuRoutes from "./menu";
+import chatRoutes from "./chat";
 
 const router: IRouter = Router();
 
@@ -12,6 +13,7 @@ router.use("/sheets", sheetsRoutes);
 router.use("/drive", driveRoutes);
 router.use("/email", emailRoutes);
 router.use("/menu", menuRoutes);
+router.use("/chat", chatRoutes);
 
 // Health check
 router.get("/health", (_req, res) => {
