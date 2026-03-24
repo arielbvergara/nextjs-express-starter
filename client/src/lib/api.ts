@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@/types";
+import type { ApiResponse, MenuItem } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
@@ -77,5 +77,10 @@ export const email = {
     request("/email/send", { method: "POST", body: JSON.stringify(payload) }),
 };
 
-export const api = { calendar, sheets, drive, email };
+// ── Menu ──────────────────────────────────────────────
+export const menu = {
+  list: () => request<MenuItem[]>("/menu"),
+};
+
+export const api = { calendar, sheets, drive, email, menu };
 export default api;
