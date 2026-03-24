@@ -7,11 +7,11 @@ import { googleAuth } from "../config/google";
 import { SheetsService } from "../services/sheets";
 
 const MENU_ITEMS: string[][] = [
-  ["Caesar Salad", "Crispy romaine lettuce, parmesan, croutons, and Caesar dressing", "Regular", "9.50", "", "", ""],
-  ["Margherita Pizza", "Classic tomato base, fresh mozzarella, and basil", "Personal (8\")", "12.00", "Large (14\")", "20.00", ""],
-  ["Beef Burger", "Angus beef patty with lettuce, tomato, onion, and house sauce", "Single", "11.00", "Double", "14.50", ""],
-  ["Grilled Salmon", "Atlantic salmon fillet with seasonal vegetables and lemon butter", "Portion", "22.00", "", "", ""],
-  ["Chocolate Lava Cake", "Warm chocolate cake with a molten center, served with vanilla ice cream", "Individual", "7.50", "", "", ""],
+  ["Caesar Salad", "Crispy romaine lettuce, parmesan, croutons, and Caesar dressing", "Regular", "9.50", "", "", "", "Romaine lettuce, parmesan cheese, croutons, Caesar dressing, lemon juice, black pepper"],
+  ["Margherita Pizza", "Classic tomato base, fresh mozzarella, and basil", "Personal (8\")", "12.00", "Large (14\")", "20.00", "", "Pizza dough, tomato sauce, fresh mozzarella, fresh basil, olive oil, salt"],
+  ["Beef Burger", "Angus beef patty with lettuce, tomato, onion, and house sauce", "Single", "11.00", "Double", "14.50", "", "Angus beef patty, brioche bun, lettuce, tomato, onion, house sauce, pickles"],
+  ["Grilled Salmon", "Atlantic salmon fillet with seasonal vegetables and lemon butter", "Portion", "22.00", "", "", "", "Atlantic salmon, seasonal vegetables, lemon butter sauce, herbs, olive oil"],
+  ["Chocolate Lava Cake", "Warm chocolate cake with a molten center, served with vanilla ice cream", "Individual", "7.50", "", "", "", "Dark chocolate, butter, eggs, sugar, flour, vanilla ice cream"],
 ];
 
 async function seedMenu(): Promise<void> {
