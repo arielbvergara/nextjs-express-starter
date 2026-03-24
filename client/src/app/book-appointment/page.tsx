@@ -8,7 +8,8 @@ import { FormField } from "@/components/ui/FormField";
 import { FormSuccessBanner } from "@/components/ui/FormSuccessBanner";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { InfoBanner } from "@/components/ui/InfoBanner";
-import { getScheduleForDay, WORKING_HOURS_LABEL } from "@/constants/workingHours";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { WORKING_HOURS_LABEL } from "@/constants/workingHours";
 
 const SPECIALTIES = [
   "General Practitioner",
@@ -47,41 +48,26 @@ export default function BookAppointmentPage() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dateError, setDateError] = useState<string | null>(null);
   const [success, setSuccess] = useState<SuccessData | null>(null);
 
-  function handleDateChange(value: string) {
-    if (!value) {
-      setDate("");
-      setTimeMin("");
-      setTimeMax("");
-      setTime("");
-      setDateError(null);
-      return;
-    }
-
-    const dayOfWeek = new Date(`${value}T12:00:00`).getDay();
-    const schedule = getScheduleForDay(dayOfWeek);
-
-    if (!schedule) {
-      setDateError("We are closed on weekends. Please select a weekday (Mon–Fri).");
-      setDate("");
-      setTimeMin("");
-      setTimeMax("");
-      setTime("");
-      return;
-    }
-
-    setDateError(null);
+  function handleDateChange(
+    value: string,
+    schedule: { start: string; end: string } | null
+  ) {
     setDate(value);
+    if (!value || !schedule) {
+      setTimeMin("");
+      setTimeMax("");
+      setTime("");
+      return;
+    }
     setTimeMin(schedule.start);
     setTimeMax(schedule.end);
-    setTime((prev) => {
-      if (!prev || prev < schedule.start || prev > schedule.end) {
-        return schedule.start;
-      }
-      return prev;
-    });
+    setTime((prev) =>
+      !prev || prev < schedule.start || prev > schedule.end
+        ? schedule.start
+        : prev
+    );
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -197,17 +183,12 @@ export default function BookAppointmentPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Date" required>
-              <input
-                type="date"
-                required
+              <DatePicker
                 value={date}
-                min={new Date().toISOString().split("T")[0]}
-                onChange={(e) => handleDateChange(e.target.value)}
-                className={INPUT_CLASS}
+                onChange={handleDateChange}
+                min={new Date()}
+                required
               />
-              {dateError && (
-                <p className="mt-1 text-xs text-[var(--error)]">{dateError}</p>
-              )}
             </FormField>
             <FormField label="Time" required>
               {date ? (
@@ -224,7 +205,6 @@ export default function BookAppointmentPage() {
                 <input
                   type="time"
                   disabled
-                  placeholder="Select a date first"
                   className={INPUT_DISABLED_CLASS}
                 />
               )}
