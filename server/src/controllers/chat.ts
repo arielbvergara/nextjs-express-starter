@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { googleAuth } from "../config/google";
 import { config } from "../config";
-import { ChatService } from "../services/chat";
+import { ChatService, ChatQuotaExceededError } from "../services/chat";
 import { ApiResponse } from "../types";
 
 const MAX_MESSAGE_LENGTH = 500;
@@ -58,8 +58,15 @@ export async function sendMessage(
 
     res.json({ success: true, data: { reply } });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to generate response";
-    console.error("Chat error:", message);
+    if (error instanceof ChatQuotaExceededError) {
+      res.status(503).json({
+        success: false,
+        error: "Our menu assistant is temporarily busy. Please try again in a moment.",
+      });
+      return;
+    }
+    const errMessage = error instanceof Error ? error.message : "Failed to generate response";
+    console.error("Chat error:", errMessage);
     res.status(500).json({ success: false, error: "Failed to generate response" });
   }
 }

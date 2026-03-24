@@ -26,7 +26,7 @@ vi.mock("./menu", () => ({
   }),
 }));
 
-import { ChatService } from "./chat";
+import { ChatService, ChatQuotaExceededError } from "./chat";
 
 const SAMPLE_ITEMS: MenuItem[] = [
   {
@@ -73,6 +73,18 @@ describe("ChatService.generateReply", () => {
     mockGenerateContent.mockRejectedValue(new Error("Network error"));
     const service = makeService();
     await expect(service.generateReply("Hello")).rejects.toThrow("Failed to generate response");
+  });
+
+  it("generateReply_ShouldThrowChatQuotaExceededError_WhenGeminiReturnsQuotaError", async () => {
+    mockGenerateContent.mockRejectedValue(new Error("Quota exceeded for metric: generativelanguage"));
+    const service = makeService();
+    await expect(service.generateReply("Hello")).rejects.toBeInstanceOf(ChatQuotaExceededError);
+  });
+
+  it("generateReply_ShouldThrowChatQuotaExceededError_WhenGeminiReturnsRateLimitError", async () => {
+    mockGenerateContent.mockRejectedValue(new Error("Resource exhausted"));
+    const service = makeService();
+    await expect(service.generateReply("Hello")).rejects.toBeInstanceOf(ChatQuotaExceededError);
   });
 
   it("generateReply_ShouldFetchMenuItems_WhenCalled", async () => {

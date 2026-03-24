@@ -2,18 +2,28 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Request, Response } from "express";
 
 // ── Hoist mock refs ───────────────────────────────────────────────────────────
-const { mockGenerateReply, mockConfig } = vi.hoisted(() => ({
-  mockGenerateReply: vi.fn(),
-  mockConfig: {
-    google: { sheetsId: "test-sheet-id" },
-    gemini: { apiKey: "test-api-key" },
-  },
-}));
+const { mockGenerateReply, mockConfig, MockChatQuotaExceededError } = vi.hoisted(() => {
+  class MockChatQuotaExceededError extends Error {
+    constructor() {
+      super("Quota exceeded");
+      this.name = "ChatQuotaExceededError";
+    }
+  }
+  return {
+    mockGenerateReply: vi.fn(),
+    mockConfig: {
+      google: { sheetsId: "test-sheet-id" },
+      gemini: { apiKey: "test-api-key" },
+    },
+    MockChatQuotaExceededError,
+  };
+});
 
 vi.mock("../services/chat", () => ({
   ChatService: vi.fn().mockImplementation(function (this: { generateReply: typeof mockGenerateReply }) {
     this.generateReply = mockGenerateReply;
   }),
+  ChatQuotaExceededError: MockChatQuotaExceededError,
 }));
 
 vi.mock("../config", () => ({ config: mockConfig }));
@@ -105,6 +115,20 @@ describe("chat controller — sendMessage", () => {
     expect(res.json).toHaveBeenCalledWith({
       success: false,
       error: "Failed to generate response",
+    });
+  });
+
+  it("sendMessage_ShouldReturn503WithFriendlyMessage_WhenQuotaIsExceeded", async () => {
+    mockGenerateReply.mockRejectedValueOnce(new MockChatQuotaExceededError());
+    const req = { body: { message: "What do you have?" } } as Request;
+    const res = buildRes();
+
+    await sendMessage(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      error: "Our menu assistant is temporarily busy. Please try again in a moment.",
     });
   });
 

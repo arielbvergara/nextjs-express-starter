@@ -3,7 +3,10 @@ import { GoogleAuth } from "google-auth-library";
 import { MenuItem } from "../types";
 import { MenuService } from "./menu";
 
+const GEMINI_MODEL = "gemini-1.5-flash";
 const MAX_REPLY_LENGTH = 2000;
+const QUOTA_EXCEEDED_PATTERN = /quota exceeded/i;
+const RATE_LIMIT_PATTERN = /rate limit|resource exhausted/i;
 
 const SYSTEM_PROMPT_TEMPLATE = `You are a friendly menu assistant for this restaurant. Your ONLY purpose is to answer questions about the restaurant menu: dishes, ingredients, pricing, portion sizes, dietary information, and recommendations based on the available menu items.
 
@@ -17,6 +20,13 @@ STRICT RULES — follow all of these without exception:
 
 CURRENT MENU:
 {{MENU_CONTEXT}}`;
+
+export class ChatQuotaExceededError extends Error {
+  constructor() {
+    super("Quota exceeded");
+    this.name = "ChatQuotaExceededError";
+  }
+}
 
 export class ChatService {
   private readonly genAI: GoogleGenerativeAI;
@@ -35,7 +45,7 @@ export class ChatService {
     const systemInstruction = this.buildSystemInstruction(menuContext);
 
     const model = this.genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: GEMINI_MODEL,
       systemInstruction,
     });
 
@@ -44,8 +54,11 @@ export class ChatService {
       const result = await model.generateContent(userMessage);
       raw = result.response.text();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("Gemini API error:", message);
+      const errMessage = err instanceof Error ? err.message : String(err);
+      console.error("Gemini API error:", errMessage);
+      if (QUOTA_EXCEEDED_PATTERN.test(errMessage) || RATE_LIMIT_PATTERN.test(errMessage)) {
+        throw new ChatQuotaExceededError();
+      }
       throw new Error("Failed to generate response");
     }
 
