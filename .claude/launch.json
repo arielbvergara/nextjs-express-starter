@@ -3,15 +3,15 @@
   "configurations": [
     {
       "name": "frontend",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev:client"],
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "PATH=/opt/homebrew/bin:/usr/local/bin:$PATH pnpm --filter client dev"],
       "port": 3000,
       "autoPort": false
     },
     {
       "name": "backend",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev:server"],
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "PATH=/opt/homebrew/bin:/usr/local/bin:$PATH pnpm --filter server dev"],
       "port": 4000,
       "autoPort": false
     }
