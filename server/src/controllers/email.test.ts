@@ -10,6 +10,14 @@ vi.mock("../services/email", () => ({
   }),
 }));
 
+vi.mock("../config", () => ({
+  config: {
+    email: {
+      allowedRecipients: ["allowed@example.com"],
+    },
+  },
+}));
+
 import { sendEmail } from "./email";
 
 function buildRes(): Response {
@@ -29,7 +37,7 @@ describe("email controller — sendEmail", () => {
     mockSendEmail.mockResolvedValueOnce(undefined);
 
     const req = {
-      body: { to: "user@example.com", subject: "Hi", body: "Hello!" },
+      body: { to: "allowed@example.com", subject: "Hi", body: "Hello!" },
     } as Request;
     const res = buildRes();
 
@@ -44,7 +52,7 @@ describe("email controller — sendEmail", () => {
 
   it("sendEmail_ShouldReturn400_WhenRequiredFieldIsMissing", async () => {
     const req = {
-      body: { to: "user@example.com", subject: "Hi" }, // missing body
+      body: { to: "allowed@example.com", subject: "Hi" }, // missing body
     } as Request;
     const res = buildRes();
 
@@ -58,11 +66,43 @@ describe("email controller — sendEmail", () => {
     expect(mockSendEmail).not.toHaveBeenCalled();
   });
 
+  it("sendEmail_ShouldReturn400_WhenEmailFormatIsInvalid", async () => {
+    const req = {
+      body: { to: "not-an-email", subject: "Hi", body: "Hello!" },
+    } as Request;
+    const res = buildRes();
+
+    await sendEmail(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      error: "Invalid email address",
+    });
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("sendEmail_ShouldReturn403_WhenRecipientNotInWhitelist", async () => {
+    const req = {
+      body: { to: "stranger@example.com", subject: "Hi", body: "Hello!" },
+    } as Request;
+    const res = buildRes();
+
+    await sendEmail(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      error: "Recipient not allowed",
+    });
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
   it("sendEmail_ShouldReturn500_WhenEmailServiceThrows", async () => {
     mockSendEmail.mockRejectedValueOnce(new Error("Gmail API error"));
 
     const req = {
-      body: { to: "user@example.com", subject: "Hi", body: "Hello!" },
+      body: { to: "allowed@example.com", subject: "Hi", body: "Hello!" },
     } as Request;
     const res = buildRes();
 

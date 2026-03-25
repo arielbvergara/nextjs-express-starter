@@ -27,6 +27,11 @@ export const config = {
   googleMaps: {
     apiKey: process.env.GOOGLE_MAPS_API_KEY || "",
   },
+  email: {
+    allowedRecipients: process.env.ALLOWED_EMAIL_RECIPIENTS
+      ? process.env.ALLOWED_EMAIL_RECIPIENTS.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
+      : [],
+  },
 } as const;
 
 // Validate required config in production
