@@ -8,6 +8,7 @@ import { StarRating } from "@/components/ui/StarRating";
 import { ReviewCard } from "@/components/ui/ReviewCard";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { InfoBanner } from "@/components/ui/InfoBanner";
+import { SkeletonPulse } from "@/components/ui/SkeletonPulse";
 
 const MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -101,10 +102,6 @@ function ReviewsList({ reviews }: { details: PlaceDetails; reviews: PlaceDetails
       </div>
     </div>
   );
-}
-
-function SkeletonPulse({ className }: { className: string }) {
-  return <div className={`animate-pulse rounded bg-[var(--border)] ${className}`} />;
 }
 
 function LocationSkeleton() {
