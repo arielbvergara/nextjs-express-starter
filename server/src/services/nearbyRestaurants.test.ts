@@ -93,6 +93,7 @@ describe("NearbyRestaurantsService.getNearbyRestaurantsWithoutWebsite", () => {
           "X-Goog-Api-Key": "test-api-key",
           "X-Goog-FieldMask": expect.stringContaining("places.websiteUri"),
         }),
+        body: expect.stringContaining('"rankPreference":"DISTANCE"'),
       })
     );
   });

@@ -12,6 +12,7 @@ const PLACES_API_BASE_URL = "https://places.googleapis.com/v1";
 
 // Only the fields we need; narrow mask reduces billing cost.
 // websiteUri is included so we can filter it out server-side.
+// nextPageToken is needed for pagination.
 const FIELD_MASK = [
   "places.displayName",
   "places.websiteUri",
@@ -22,6 +23,7 @@ const FIELD_MASK = [
 
 const CACHE_KEY_NEARBY_RESTAURANTS = "nearby-restaurants-no-website";
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const MAX_PAGES = 3; // up to 60 candidates (20 per page)
 
 // ── Places API (New) response types ──────────────────────────────────────────
 
@@ -35,6 +37,7 @@ type PlacesApiPlace = {
 
 type PlacesApiNearbyResponse = {
   places?: PlacesApiPlace[];
+  nextPageToken?: string;
   error?: { message: string; status: string };
 };
 
@@ -89,15 +92,15 @@ export class NearbyRestaurantsService {
     return MOCK_NEARBY_RESTAURANTS;
   }
 
+  // Fetches up to MAX_PAGES pages from the Places API and filters out places
+  // that have a website. Uses DISTANCE ranking so small local restaurants
+  // (which are less likely to have a website) appear first.
   private async fetchFromPlacesApi(): Promise<NearbyRestaurant[]> {
-    const response = await fetch(`${PLACES_API_BASE_URL}/places:searchNearby`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": this.mapsApiKey,
-        "X-Goog-FieldMask": FIELD_MASK,
-      },
-      body: JSON.stringify({
+    const allPlaces: PlacesApiPlace[] = [];
+    let pageToken: string | undefined = undefined;
+
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const body: Record<string, unknown> = {
         includedTypes: ["restaurant"],
         locationRestriction: {
           circle: {
@@ -109,22 +112,44 @@ export class NearbyRestaurantsService {
           },
         },
         maxResultCount: 20,
-      }),
-    });
+        rankPreference: "DISTANCE",
+      };
 
-    if (!response.ok) {
-      throw new Error(`Places API (New) nearby search failed with HTTP ${response.status}`);
+      if (pageToken) {
+        body.pageToken = pageToken;
+      }
+
+      const response = await fetch(`${PLACES_API_BASE_URL}/places:searchNearby`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": this.mapsApiKey,
+          "X-Goog-FieldMask": FIELD_MASK,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Places API (New) nearby search failed with HTTP ${response.status}`);
+      }
+
+      const json = (await response.json()) as PlacesApiNearbyResponse;
+
+      if (json.error) {
+        throw new Error(
+          `Places API (New) returned error: ${json.error.status} — ${json.error.message}`
+        );
+      }
+
+      allPlaces.push(...(json.places ?? []));
+
+      if (!json.nextPageToken) {
+        break;
+      }
+      pageToken = json.nextPageToken;
     }
 
-    const json = (await response.json()) as PlacesApiNearbyResponse;
-
-    if (json.error) {
-      throw new Error(
-        `Places API (New) returned error: ${json.error.status} — ${json.error.message}`
-      );
-    }
-
-    const restaurants: NearbyRestaurant[] = (json.places ?? [])
+    const restaurants: NearbyRestaurant[] = allPlaces
       .filter((place) => !place.websiteUri)
       .map((place) => ({
         name: place.displayName?.text ?? "Unknown Restaurant",
