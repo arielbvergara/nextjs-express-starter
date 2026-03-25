@@ -4,7 +4,7 @@ import { SheetData } from "../types";
 
 // Internal shape of the `tables[]` field returned by the Sheets API (not yet in googleapis types)
 interface SheetApiTable {
-  displayName: string;
+  name: string;
   range: {
     startRowIndex: number;
     endRowIndex: number;
@@ -66,14 +66,15 @@ export class SheetsService {
     if (!tables?.length) return [];
 
     return tables
-      .filter((t) => t.displayName && t.range)
+      .filter((t) => t.name && t.range)
       .map((t) => ({
-        displayName: t.displayName,
+        displayName: t.name,
         startRowIndex: t.range.startRowIndex ?? 0,
         endRowIndex: t.range.endRowIndex ?? 0,
         startColumnIndex: t.range.startColumnIndex ?? 0,
         endColumnIndex: t.range.endColumnIndex ?? 0,
-      }));
+      }))
+      .sort((a, b) => a.startRowIndex - b.startRowIndex);
   }
 
   async appendRow(spreadsheetId: string, values: string[]): Promise<void> {
