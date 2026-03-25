@@ -16,6 +16,11 @@ export interface MenuItem {
   ingredients?: string;
 }
 
+export interface MenuSection {
+  name: string;
+  items: MenuItem[];
+}
+
 export interface CalendarEvent {
   id?: string;
   summary: string;
