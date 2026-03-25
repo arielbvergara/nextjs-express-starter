@@ -1,4 +1,4 @@
-import type { ApiResponse, MenuItem, PlaceDetails } from "@/types";
+import type { ApiResponse, MenuItem, NearbyRestaurant, PlaceDetails } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
@@ -107,5 +107,10 @@ export const location = {
   getDetails: () => request<PlaceDetails>("/location"),
 };
 
-export const api = { calendar, sheets, drive, email, menu, chat, location };
+// ── Nearby Restaurants ────────────────────────────────
+export const nearbyRestaurants = {
+  getList: () => request<NearbyRestaurant[]>("/nearby-restaurants"),
+};
+
+export const api = { calendar, sheets, drive, email, menu, chat, location, nearbyRestaurants };
 export default api;
