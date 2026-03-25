@@ -23,7 +23,7 @@ const SECURITY_HEADERS = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' https: data: blob:",
-      "frame-src https://www.google.com",
+      "frame-src https://www.google.com https://maps.google.com",
       "connect-src 'self' ws: wss:",
       "object-src 'none'",
       "base-uri 'self'",
