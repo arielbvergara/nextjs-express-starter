@@ -52,13 +52,11 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    // Restrict Next.js image optimisation to known trusted domains.
-    // Add additional patterns here if menu images are hosted outside Google's CDN.
-    remotePatterns: [
-      { protocol: "https", hostname: "**.googleusercontent.com" },
-      { protocol: "https", hostname: "**.google.com" },
-      { protocol: "https", hostname: "images.unsplash.com" },
-    ],
+    // Menu images are sourced from arbitrary third-party URLs stored in Google
+    // Sheets, so the full set of hostnames cannot be enumerated upfront.
+    // Protocol is restricted to HTTPS to prevent mixed-content and plain-HTTP
+    // image requests; HTTP sources should be updated in the spreadsheet data.
+    remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
 };
 
