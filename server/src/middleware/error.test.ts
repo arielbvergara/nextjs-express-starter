@@ -19,7 +19,7 @@ describe("errorHandler middleware", () => {
 
   it("errorHandler_ShouldReturnGenericMessage_WhenInProduction", () => {
     process.env.NODE_ENV = "production";
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
 
     const err = new Error("Sensitive internal error");
     const res = buildRes();
