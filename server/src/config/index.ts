@@ -24,6 +24,9 @@ export const config = {
   gemini: {
     apiKey: process.env.GEMINI_API_KEY || "",
   },
+  googleMaps: {
+    apiKey: process.env.GOOGLE_MAPS_API_KEY || "",
+  },
 } as const;
 
 // Validate required config in production
