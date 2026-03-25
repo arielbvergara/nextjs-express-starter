@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { googleAuth } from "../config/google";
 import { DriveService } from "../services/drive";
+import { isValidDriveFileId } from "../lib/validation";
 import { ApiResponse } from "../types";
 
 export async function listFiles(
@@ -24,11 +25,21 @@ export async function downloadFile(
   res: Response
 ): Promise<void> {
   try {
-    const driveService = new DriveService(googleAuth);
     const fileId = req.params.fileId as string;
+
+    if (!isValidDriveFileId(fileId)) {
+      res.status(400).json({ success: false, error: "Invalid file ID" });
+      return;
+    }
+
+    const driveService = new DriveService(googleAuth);
     const { data, mimeType, fileName } = await driveService.downloadFile(fileId);
     res.setHeader("Content-Type", mimeType);
-    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    // RFC 5987 encoding prevents header injection via filenames with special characters
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`
+    );
     data.pipe(res);
   } catch (error: any) {
     console.error("Drive download error:", error.message);

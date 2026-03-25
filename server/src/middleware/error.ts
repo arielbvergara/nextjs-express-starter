@@ -8,7 +8,9 @@ export function errorHandler(
   _next: NextFunction
 ): void {
   console.error("Unhandled error:", err.message);
-  console.error(err.stack);
+  if (process.env.NODE_ENV !== "production") {
+    console.error(err.stack);
+  }
 
   res.status(500).json({
     success: false,
