@@ -6,6 +6,7 @@ import emailRoutes from "./email";
 import menuRoutes from "./menu";
 import chatRoutes from "./chat";
 import locationRoutes from "./location";
+import nearbyRestaurantsRoutes from "./nearbyRestaurants";
 
 const router: IRouter = Router();
 
@@ -16,6 +17,7 @@ router.use("/email", emailRoutes);
 router.use("/menu", menuRoutes);
 router.use("/chat", chatRoutes);
 router.use("/location", locationRoutes);
+router.use("/nearby-restaurants", nearbyRestaurantsRoutes);
 
 // Health check
 router.get("/health", (_req, res) => {

@@ -54,3 +54,9 @@ export interface PlaceDetails {
   reviews: PlaceReview[];
   mapsUrl: string;
 }
+
+export interface NearbyRestaurant {
+  name: string;
+  description: string;
+  mapsUrl: string;
+}
