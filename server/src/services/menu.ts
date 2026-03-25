@@ -1,8 +1,8 @@
 import { GoogleAuth } from "google-auth-library";
 import { MenuItem, MenuSection } from "../types";
-import { SheetsService } from "./sheets";
+import { SheetsService, SheetTableMetadata } from "./sheets";
 
-const MENU_SHEET_RANGE = "Menu";
+const MENU_SHEET_NAME = "Menu";
 const HEADER_ROW_MARKER = "title";
 
 const COL_TITLE = 0;
@@ -23,7 +23,13 @@ export class MenuService {
   }
 
   async getMenuSections(spreadsheetId: string): Promise<MenuSection[]> {
-    const data = await this.sheetsService.readSpreadsheet(spreadsheetId, MENU_SHEET_RANGE);
+    const tables = await this.sheetsService.getSheetTables(spreadsheetId, MENU_SHEET_NAME);
+
+    if (tables.length > 0) {
+      return this.sectionsFromTables(spreadsheetId, tables);
+    }
+
+    const data = await this.sheetsService.readSpreadsheet(spreadsheetId, MENU_SHEET_NAME);
     return this.parseMenuSections(data.values);
   }
 
@@ -70,6 +76,44 @@ export class MenuService {
       .slice(1)
       .filter((row) => row[COL_TITLE]?.trim() !== "" && row[COL_TITLE] !== undefined)
       .map((row) => this.mapRowToMenuItem(row));
+  }
+
+  private async sectionsFromTables(
+    spreadsheetId: string,
+    tables: SheetTableMetadata[]
+  ): Promise<MenuSection[]> {
+    const sections: MenuSection[] = [];
+
+    for (const table of tables) {
+      const range = this.tableRangeToA1(MENU_SHEET_NAME, table);
+      const data = await this.sheetsService.readSpreadsheet(spreadsheetId, range);
+      // First row of the table range is the header — reuse parseMenuItems which skips row[0]
+      const items = this.parseMenuItems(data.values);
+      if (items.length > 0) {
+        sections.push({ name: table.displayName, items });
+      }
+    }
+
+    return sections;
+  }
+
+  private tableRangeToA1(sheetName: string, table: SheetTableMetadata): string {
+    const startCol = this.columnIndexToLetter(table.startColumnIndex);
+    const endCol = this.columnIndexToLetter(table.endColumnIndex - 1);
+    const startRow = table.startRowIndex + 1; // convert to 1-indexed
+    const endRow = table.endRowIndex;         // endRowIndex is exclusive → already correct for 1-indexed end
+    return `${sheetName}!${startCol}${startRow}:${endCol}${endRow}`;
+  }
+
+  private columnIndexToLetter(index: number): string {
+    let letter = "";
+    let n = index + 1;
+    while (n > 0) {
+      const remainder = (n - 1) % 26;
+      letter = String.fromCharCode(65 + remainder) + letter;
+      n = Math.floor((n - 1) / 26);
+    }
+    return letter;
   }
 
   private mapRowToMenuItem(row: string[]): MenuItem {

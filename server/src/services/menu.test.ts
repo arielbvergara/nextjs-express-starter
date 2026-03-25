@@ -275,3 +275,47 @@ describe("MenuService.parseMenuSections", () => {
     expect(result[0].items[0].title).toBe("Water");
   });
 });
+
+describe("MenuService.columnIndexToLetter", () => {
+  const svc = service as any;
+
+  it("columnIndexToLetter_ShouldReturnA_WhenIndexIsZero", () => {
+    expect(svc.columnIndexToLetter(0)).toBe("A");
+  });
+
+  it("columnIndexToLetter_ShouldReturnH_WhenIndexIsSeven", () => {
+    expect(svc.columnIndexToLetter(7)).toBe("H");
+  });
+
+  it("columnIndexToLetter_ShouldReturnZ_WhenIndexIsTwentyFive", () => {
+    expect(svc.columnIndexToLetter(25)).toBe("Z");
+  });
+
+  it("columnIndexToLetter_ShouldReturnAA_WhenIndexIsTwentySix", () => {
+    expect(svc.columnIndexToLetter(26)).toBe("AA");
+  });
+
+  it("columnIndexToLetter_ShouldReturnAZ_WhenIndexIsFiftyOne", () => {
+    expect(svc.columnIndexToLetter(51)).toBe("AZ");
+  });
+});
+
+describe("MenuService.tableRangeToA1", () => {
+  const svc = service as any;
+
+  it("tableRangeToA1_ShouldReturnCorrectA1Range_WhenTableStartsAtTopLeft", () => {
+    const table = { startRowIndex: 0, endRowIndex: 5, startColumnIndex: 0, endColumnIndex: 8 };
+    expect(svc.tableRangeToA1("Menu", table)).toBe("Menu!A1:H5");
+  });
+
+  it("tableRangeToA1_ShouldReturnCorrectA1Range_WhenTableStartsAtOffset", () => {
+    // e.g. table header at row 4 (0-indexed), data rows 5-10, 8 columns
+    const table = { startRowIndex: 4, endRowIndex: 10, startColumnIndex: 0, endColumnIndex: 8 };
+    expect(svc.tableRangeToA1("Menu", table)).toBe("Menu!A5:H10");
+  });
+
+  it("tableRangeToA1_ShouldIncludeSheetName_WhenSheetNameProvided", () => {
+    const table = { startRowIndex: 0, endRowIndex: 3, startColumnIndex: 0, endColumnIndex: 8 };
+    expect(svc.tableRangeToA1("Menu", table)).toContain("Menu!");
+  });
+});
