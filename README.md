@@ -101,6 +101,11 @@ GMAIL_CLIENT_ID=your-client-id.apps.googleusercontent.com
 GMAIL_CLIENT_SECRET=your-client-secret
 GMAIL_REFRESH_TOKEN=your-refresh-token
 GMAIL_SENDER_EMAIL=your-gmail-address@gmail.com
+
+# Google Maps Platform (location page — optional)
+# Required for: Google Maps embed + live Google Places reviews
+GOOGLE_MAPS_API_KEY=your-maps-api-key           # server/.env.local
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-maps-api-key  # client/.env.local
 ```
 
 ## Google Cloud Setup
@@ -134,6 +139,29 @@ The Gmail integration uses OAuth2 user credentials (not a service account) to se
    - Authorize the scope: `https://www.googleapis.com/auth/gmail.send`
    - Exchange the authorization code for tokens and copy the **Refresh token**
 5. Add all four values to your `.env.local`
+
+## Google Maps & Places API Setup
+
+The `/location` page embeds a Google Map and displays live reviews fetched from the **Places API (New)**. Both features require a Google Maps Platform API key. Without one the map still renders (using a keyless embed URL) and reviews fall back to placeholder data.
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) and select your project
+2. **Enable billing** on the project — required even within the free tier ($200/month free credit)
+3. Go to **APIs & Services → Library** and enable:
+   - **Maps Embed API** (powers the interactive map iframe)
+   - **Places API (New)** (fetches name, rating, and reviews — search for "Places API (New)", not the legacy "Places API")
+4. Go to **APIs & Services → Credentials → Create Credentials → API Key**
+5. Optionally restrict the key to those two APIs under **API restrictions** for security
+6. Add the key to **both** environment files:
+
+```bash
+# server/.env.local  — used by the Places API fetch on the backend
+GOOGLE_MAPS_API_KEY=your-maps-api-key
+
+# client/.env.local  — used to build the Maps Embed iframe src
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-maps-api-key
+```
+
+No code changes are required — the app detects the key at runtime and automatically switches from mock data to live data.
 
 ## API Endpoints
 
@@ -172,6 +200,12 @@ All endpoints are prefixed with `/api`.
 | ------ | -------------- | ---------------------------------------- |
 | `POST` | `/email/send`  | Send an email via Gmail API. Body: `{ to, subject, body }` |
 
+### Location
+
+| Method | Path        | Description                              |
+| ------ | ----------- | ---------------------------------------- |
+| `GET`  | `/location` | Returns place name, address, rating, review count, and up to 5 reviews via the Places API (New). Returns mock data when `GOOGLE_MAPS_API_KEY` is not set. |
+
 ## Rate Limiting & Cache
 
 **Rate limits** are applied per route:
@@ -182,7 +216,7 @@ All endpoints are prefixed with `/api`.
 
 ## Example Pages
 
-Four usage example pages are included to demonstrate all services end-to-end:
+Five usage example pages are included to demonstrate all services end-to-end:
 
 | Page                | Route               | Description                                            |
 | ------------------- | ------------------- | ------------------------------------------------------ |
@@ -190,6 +224,7 @@ Four usage example pages are included to demonstrate all services end-to-end:
 | Book an Appointment | `/book-appointment` | Form that creates a doctor appointment in the calendar |
 | Contact Us          | `/contact`          | Form that appends a row to `GOOGLE_SHEETS_ID`          |
 | Send Email          | `/email`            | Form that sends a transactional email via the Gmail API |
+| Our Location        | `/location`         | Google Maps embed + place rating and reviews via the Places API |
 
 ## Scripts
 
