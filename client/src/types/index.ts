@@ -37,3 +37,20 @@ export interface DriveFile {
   size?: string;
   modifiedTime?: string;
 }
+
+export interface PlaceReview {
+  authorName: string;
+  rating: number;
+  text: string;
+  relativeTimeDescription: string;
+  profilePhotoUrl?: string;
+}
+
+export interface PlaceDetails {
+  name: string;
+  address: string;
+  rating: number;
+  totalReviews: number;
+  reviews: PlaceReview[];
+  mapsUrl: string;
+}
