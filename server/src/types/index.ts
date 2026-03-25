@@ -49,6 +49,11 @@ export interface MenuItem {
   ingredients?: string;
 }
 
+export interface MenuSection {
+  name: string;
+  items: MenuItem[];
+}
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;

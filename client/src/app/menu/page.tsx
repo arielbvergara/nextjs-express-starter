@@ -4,18 +4,59 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { api } from "@/lib/api";
-import type { MenuItem } from "@/types";
+import type { MenuSection, MenuItem } from "@/types";
 import { MenuChatbot } from "@/components/ui/MenuChatbot";
 
+function MenuItemCard({ item }: { item: MenuItem }) {
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden flex flex-col shadow-sm hover:shadow-md hover:border-[var(--accent)]/30 transition-all duration-150">
+      {item.imageUrl ? (
+        <div className="aspect-video overflow-hidden bg-[var(--border)] relative">
+          <Image
+            src={item.imageUrl}
+            alt={item.title}
+            fill
+            className="object-cover"
+          />
+        </div>
+      ) : (
+        <div className="aspect-video bg-[var(--border)] flex items-center justify-center text-[var(--muted)] text-sm">
+          No image
+        </div>
+      )}
+
+      <div className="p-5 flex flex-col gap-3 flex-1">
+        <div>
+          <h3 className="text-lg font-semibold text-[var(--foreground)]">{item.title}</h3>
+          <p className="text-[var(--muted)] text-sm mt-1">{item.description}</p>
+        </div>
+
+        <div className="mt-auto space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-[var(--muted)]">{item.price1Description}</span>
+            <span className="font-semibold text-[var(--foreground)]">{item.price1}</span>
+          </div>
+          {item.price2Description && item.price2 && (
+            <div className="flex items-center justify-between text-sm border-t border-[var(--border)] pt-2">
+              <span className="text-[var(--muted)]">{item.price2Description}</span>
+              <span className="font-semibold text-[var(--foreground)]">{item.price2}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MenuPage() {
-  const [items, setItems] = useState<MenuItem[]>([]);
+  const [sections, setSections] = useState<MenuSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     api.menu.list().then((res) => {
       if (res.success && res.data) {
-        setItems(res.data);
+        setSections(res.data);
       } else {
         setErrorMessage(res.error ?? "Failed to load menu");
       }
@@ -53,52 +94,28 @@ export default function MenuPage() {
           <div className="rounded-xl border border-[var(--error-border)] bg-[var(--error-bg)] p-6 text-center text-[var(--error)]">
             {errorMessage}
           </div>
-        ) : items.length === 0 ? (
+        ) : sections.length === 0 ? (
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 text-center text-[var(--muted)] shadow-sm">
             No menu items available at the moment.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {items.map((item, index) => (
-              <div
-                key={index}
-                className="rounded-xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden flex flex-col shadow-sm hover:shadow-md hover:border-[var(--accent)]/30 transition-all duration-150"
-              >
-                {item.imageUrl ? (
-                  <div className="aspect-video overflow-hidden bg-[var(--border)] relative">
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="aspect-video bg-[var(--border)] flex items-center justify-center text-[var(--muted)] text-sm">
-                    No image
-                  </div>
+          <div className="space-y-12">
+            {sections.map((section) => (
+              <section key={section.name}>
+                {section.name && (
+                  <h2
+                    className="text-2xl font-bold text-[var(--foreground)] mb-6 pb-2 border-b border-[var(--border)]"
+                    style={{ fontFamily: "var(--font-family-heading)" }}
+                  >
+                    {section.name}
+                  </h2>
                 )}
-
-                <div className="p-5 flex flex-col gap-3 flex-1">
-                  <div>
-                    <h2 className="text-lg font-semibold text-[var(--foreground)]">{item.title}</h2>
-                    <p className="text-[var(--muted)] text-sm mt-1">{item.description}</p>
-                  </div>
-
-                  <div className="mt-auto space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-[var(--muted)]">{item.price1Description}</span>
-                      <span className="font-semibold text-[var(--foreground)]">{item.price1}</span>
-                    </div>
-                    {item.price2Description && item.price2 && (
-                      <div className="flex items-center justify-between text-sm border-t border-[var(--border)] pt-2">
-                        <span className="text-[var(--muted)]">{item.price2Description}</span>
-                        <span className="font-semibold text-[var(--foreground)]">{item.price2}</span>
-                      </div>
-                    )}
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {section.items.map((item, index) => (
+                    <MenuItemCard key={index} item={item} />
+                  ))}
                 </div>
-              </div>
+              </section>
             ))}
           </div>
         )}
