@@ -47,10 +47,15 @@ export class SheetsService {
     spreadsheetId: string,
     sheetName: string
   ): Promise<SheetTableMetadata[]> {
-    const response = await this.sheets.spreadsheets.get({
-      spreadsheetId,
-      fields: "sheets(properties(title),tables(displayName,range))",
-    });
+    let response;
+    try {
+      // Fetch without a fields mask so the request succeeds even if the `tables`
+      // field is not yet supported by all API versions/regions.
+      response = await this.sheets.spreadsheets.get({ spreadsheetId });
+    } catch {
+      // If the metadata fetch fails for any reason, fall back to row-based parsing.
+      return [];
+    }
 
     const sheet = response.data.sheets?.find(
       (s) => s.properties?.title === sheetName
