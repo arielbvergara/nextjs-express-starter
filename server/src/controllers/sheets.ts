@@ -4,6 +4,7 @@ import { config } from "../config";
 import { SheetsService } from "../services/sheets";
 import { EmailService } from "../services/email";
 import { cache } from "../lib/cache";
+import { isValidEmail, isValidSpreadsheetId } from "../lib/validation";
 import { ApiResponse, ContactRow } from "../types";
 
 export async function readSpreadsheet(
@@ -12,6 +13,12 @@ export async function readSpreadsheet(
 ): Promise<void> {
   try {
     const spreadsheetId = req.params.spreadsheetId as string;
+
+    if (!isValidSpreadsheetId(spreadsheetId)) {
+      res.status(400).json({ success: false, error: "Invalid spreadsheet ID" });
+      return;
+    }
+
     const range = (req.query.range as string) || "Sheet1";
     const cacheKey = `sheets:${spreadsheetId}:${range}`;
 
@@ -58,15 +65,17 @@ export async function appendRow(
     // Invalidate cached reads for this sheet so the next GET reflects the new row
     cache.invalidatePrefix(`sheets:${config.google.sheetsId}:`);
 
-    // Send receipt email to the submitter (non-blocking)
-    const emailService = new EmailService();
-    emailService
-      .sendEmail({
-        to: email,
-        subject: "We received your message",
-        body: `Hi ${name},\n\nThank you for reaching out! We've received your message and will get back to you shortly.\n\nYour message:\n${message}`,
-      })
-      .catch((err) => console.error("Contact receipt email error:", err.message));
+    // Send receipt email to the submitter (non-blocking, only when address is valid)
+    if (isValidEmail(email)) {
+      const emailService = new EmailService();
+      emailService
+        .sendEmail({
+          to: email,
+          subject: "We received your message",
+          body: `Hi ${name},\n\nThank you for reaching out! We've received your message and will get back to you shortly.\n\nYour message:\n${message}`,
+        })
+        .catch((err) => console.error("Contact receipt email error:", err.message));
+    }
 
     res.status(201).json({ success: true, message: "Contact registered successfully" });
   } catch (error: any) {
