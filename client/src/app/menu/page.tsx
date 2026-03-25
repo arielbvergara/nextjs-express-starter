@@ -102,12 +102,14 @@ export default function MenuPage() {
           <div className="space-y-12">
             {sections.map((section) => (
               <section key={section.name}>
-                <h2
-                  className="text-2xl font-bold text-[var(--foreground)] mb-6 pb-2 border-b border-[var(--border)]"
-                  style={{ fontFamily: "var(--font-family-heading)" }}
-                >
-                  {section.name}
-                </h2>
+                {section.name && (
+                  <h2
+                    className="text-2xl font-bold text-[var(--foreground)] mb-6 pb-2 border-b border-[var(--border)]"
+                    style={{ fontFamily: "var(--font-family-heading)" }}
+                  >
+                    {section.name}
+                  </h2>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {section.items.map((item, index) => (
                     <MenuItemCard key={index} item={item} />
