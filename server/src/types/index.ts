@@ -83,3 +83,18 @@ export interface NearbyRestaurant {
   description: string;
   mapsUrl: string;
 }
+
+export interface CloudinaryImage {
+  publicId: string;
+  url: string;
+  secureUrl: string;
+  format: string;
+  width: number;
+  height: number;
+  createdAt: string;
+}
+
+export interface AdminSession {
+  token: string;
+  expiresAt: number;
+}

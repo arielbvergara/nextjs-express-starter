@@ -32,6 +32,15 @@ export const config = {
       ? process.env.ALLOWED_EMAIL_RECIPIENTS.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
       : [],
   },
+  admin: {
+    password: process.env.ADMIN_PASSWORD || "",
+  },
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME || "",
+    apiKey: process.env.CLOUDINARY_API_KEY || "",
+    apiSecret: process.env.CLOUDINARY_API_SECRET || "",
+    folder: process.env.CLOUDINARY_FOLDER || "",
+  },
 } as const;
 
 // Validate required config in production
