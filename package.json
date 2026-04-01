@@ -1,5 +1,5 @@
 {
-  "name": "basic-website-boilerplate",
+  "name": "nextjs-express-starter",
   "version": "1.0.0",
   "private": true,
   "description": "Next.js + Express boilerplate with Google services integration",

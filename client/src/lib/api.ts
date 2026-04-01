@@ -1,4 +1,4 @@
-import type { ApiResponse, MenuSection, NearbyRestaurant, PlaceDetails } from "@/types";
+import type { ApiResponse, CloudinaryImage, MenuSection, NearbyRestaurant, PlaceDetails } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
@@ -112,5 +112,23 @@ export const nearbyRestaurants = {
   getList: () => request<NearbyRestaurant[]>("/nearby-restaurants"),
 };
 
-export const api = { calendar, sheets, drive, email, menu, chat, location, nearbyRestaurants };
+// ── Admin ─────────────────────────────────────────────
+export const admin = {
+  authenticate: (password: string) =>
+    request<{ token: string }>("/admin/auth", {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    }),
+  listImages: (token: string) =>
+    request<CloudinaryImage[]>("/admin/images", {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  deleteImage: (token: string, publicId: string) =>
+    request(`/admin/images/${encodeURIComponent(publicId)}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+};
+
+export const api = { calendar, sheets, drive, email, menu, chat, location, nearbyRestaurants, admin };
 export default api;
