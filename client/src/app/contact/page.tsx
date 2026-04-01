@@ -7,8 +7,7 @@ import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { FormField } from "@/components/ui/FormField";
 import { FormSuccessBanner } from "@/components/ui/FormSuccessBanner";
 import { SubmitButton } from "@/components/ui/SubmitButton";
-
-const INPUT_CLASS = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition-shadow duration-150";
+import { Input, Textarea } from "@/components/ui/Input";
 
 export default function ContactPage() {
   const [name, setName] = useState("");
@@ -78,46 +77,19 @@ export default function ContactPage() {
 
         <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm space-y-5">
           <FormField label="Full Name" required>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Jane Doe"
-              className={INPUT_CLASS}
-            />
+            <Input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" />
           </FormField>
 
           <FormField label="Email" required>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="jane@example.com"
-              className={INPUT_CLASS}
-            />
+            <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@example.com" />
           </FormField>
 
           <FormField label="Phone" optional>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1 (555) 000-0000"
-              className={INPUT_CLASS}
-            />
+            <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 (555) 000-0000" />
           </FormField>
 
           <FormField label="Message" required>
-            <textarea
-              required
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="How can we help you?"
-              rows={4}
-              className={INPUT_CLASS + " resize-none"}
-            />
+            <Textarea required value={message} onChange={(e) => setMessage(e.target.value)} placeholder="How can we help you?" rows={4} />
           </FormField>
 
           <ErrorAlert error={error} />

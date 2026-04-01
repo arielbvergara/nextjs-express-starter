@@ -10,6 +10,7 @@ import { SubmitButton } from "@/components/ui/SubmitButton";
 import { InfoBanner } from "@/components/ui/InfoBanner";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { TimeSlotPicker, TimeSlot } from "@/components/ui/TimeSlotPicker";
+import { Input, Select, Textarea } from "@/components/ui/Input";
 import { WORKING_HOURS_LABEL, generateHourlySlots } from "@/constants/workingHours";
 
 const SPECIALTIES = [
@@ -27,8 +28,6 @@ const DURATIONS: { label: string; minutes: number }[] = [
   { label: "60 minutes", minutes: 60 },
   { label: "90 minutes", minutes: 90 },
 ];
-
-const INPUT_CLASS = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition-shadow duration-150";
 
 const SLOT_DURATION_HOURS = 1;
 
@@ -190,26 +189,15 @@ export default function BookAppointmentPage() {
 
         <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm space-y-5">
           <FormField label="Patient Name" required>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Jane Doe"
-              className={INPUT_CLASS}
-            />
+            <Input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" />
           </FormField>
 
           <FormField label="Doctor Specialty" required>
-            <select
-              value={specialty}
-              onChange={(e) => setSpecialty(e.target.value)}
-              className={INPUT_CLASS}
-            >
+            <Select value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
               {SPECIALTIES.map((s) => (
                 <option key={s}>{s}</option>
               ))}
-            </select>
+            </Select>
           </FormField>
 
           <div className="grid grid-cols-2 gap-4">
@@ -232,25 +220,15 @@ export default function BookAppointmentPage() {
           </div>
 
           <FormField label="Duration">
-            <select
-              value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
-              className={INPUT_CLASS}
-            >
+            <Select value={duration} onChange={(e) => setDuration(Number(e.target.value))}>
               {DURATIONS.map((d) => (
                 <option key={d.minutes} value={d.minutes}>{d.label}</option>
               ))}
-            </select>
+            </Select>
           </FormField>
 
           <FormField label="Notes">
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any additional notes or reason for visit…"
-              rows={3}
-              className={INPUT_CLASS + " resize-none"}
-            />
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any additional notes or reason for visit…" rows={3} />
           </FormField>
 
           <ErrorAlert error={error} />
