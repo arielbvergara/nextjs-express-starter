@@ -41,6 +41,10 @@ export const config = {
     apiSecret: process.env.CLOUDINARY_API_SECRET || "",
     folder: process.env.CLOUDINARY_FOLDER || "",
   },
+  menuScanner: {
+    spreadsheetId: process.env.MENU_SCANNER_SPREADSHEET_ID || "1f1RxKGchgGyGHl9lQdOG8DIiOa6lh8xVIk-tLOLVezM",
+    sheetGid: parseInt(process.env.MENU_SCANNER_SHEET_GID || "990327283", 10),
+  },
 } as const;
 
 // Validate required config in production

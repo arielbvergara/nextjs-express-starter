@@ -1,4 +1,5 @@
 import type { ApiResponse, CloudinaryImage, MenuSection, NearbyRestaurant, PlaceDetails } from "@/types";
+import { scanMenu as scanMenuApi } from "./menuScannerApi";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
@@ -130,5 +131,10 @@ export const admin = {
     }),
 };
 
-export const api = { calendar, sheets, drive, email, menu, chat, location, nearbyRestaurants, admin };
+// ── Menu Scanner ──────────────────────────────────────────
+export const menuScanner = {
+  scan: scanMenuApi,
+};
+
+export const api = { calendar, sheets, drive, email, menu, chat, location, nearbyRestaurants, admin, menuScanner };
 export default api;
