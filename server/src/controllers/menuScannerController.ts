@@ -5,6 +5,8 @@ import { config } from "../config";
 import { MenuScannerService, MenuScanParseError } from "../services/menuScannerService";
 import { MenuScannerSheetsWriter, SheetNotFoundError } from "../services/menuScannerSheetsWriter";
 import { ChatQuotaExceededError } from "../services/chat";
+import { cache } from "../lib/cache";
+import { MENU_CACHE_KEY } from "../lib/cacheKeys";
 import { ApiResponse, MenuScanResult } from "../types";
 
 export async function scanMenu(
@@ -38,6 +40,9 @@ export async function scanMenu(
       config.menuScanner.sheetGid
     );
     const sheetUrl = await writer.write(sections);
+
+    // Invalidate the menu page cache so the next visit reflects the fresh scan
+    cache.invalidate(MENU_CACHE_KEY);
 
     const result: MenuScanResult = {
       sections,

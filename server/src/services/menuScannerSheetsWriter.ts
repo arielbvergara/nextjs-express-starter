@@ -2,7 +2,9 @@ import { google } from "googleapis";
 import { GoogleAuth } from "google-auth-library";
 import { ScannedMenuSection } from "../types";
 
-const COLUMN_HEADERS = ["Name", "Description", "Price"];
+// Columns are ordered to match MenuService's fixed column indices:
+// 0=Title  1=Description  2=Price1Label  3=Price1  4=Price2Label  5=Price2  6=ImageUrl
+const COLUMN_HEADERS = ["Title", "Description", "", "Price", "", "", "Image URL"];
 const SHEET_URL_BASE = "https://docs.google.com/spreadsheets/d";
 
 export class SheetNotFoundError extends Error {
@@ -72,9 +74,9 @@ export class MenuScannerSheetsWriter {
     const boldRowIndices: number[] = [];
 
     sections.forEach((section, sectionIndex) => {
-      // Section header row (bold)
+      // Section header row (bold) — single value, rest empty so MenuService identifies it as a section title
       boldRowIndices.push(allRows.length);
-      allRows.push([section.section.toUpperCase(), "", ""]);
+      allRows.push([section.section.toUpperCase(), "", "", "", "", "", ""]);
 
       // Column headers row (bold)
       boldRowIndices.push(allRows.length);
@@ -82,7 +84,8 @@ export class MenuScannerSheetsWriter {
 
       // Data rows
       section.items.forEach((item) => {
-        allRows.push([item.name, item.description, item.price]);
+        // price at col 3 (COL_PRICE1), Image URL at col 6 left empty for the user to fill in
+        allRows.push([item.name, item.description, "", item.price, "", "", ""]);
       });
 
       // Blank separator row between sections (not after the last one)

@@ -65,8 +65,11 @@ vi.mock("../services/chat", () => ({
 
 vi.mock("../config", () => ({ config: mockConfig }));
 vi.mock("../config/google", () => ({ googleAuth: {} }));
+vi.mock("../lib/cache", () => ({ cache: { invalidate: vi.fn() } }));
+vi.mock("../lib/cacheKeys", () => ({ MENU_CACHE_KEY: "menu:items" }));
 
 import { scanMenu } from "./menuScannerController";
+import { cache } from "../lib/cache";
 
 function makeFile(name = "menu.jpg", mimetype = "image/jpeg"): Express.Multer.File {
   return {
@@ -195,6 +198,25 @@ describe("menuScannerController — scanMenu", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: false }));
+  });
+
+  it("scanMenu_ShouldInvalidateMenuCache_WhenScanSucceeds", async () => {
+    const req = { files: SAMPLE_FILES } as Request;
+    const res = buildRes();
+
+    await scanMenu(req, res);
+
+    expect(cache.invalidate).toHaveBeenCalledWith("menu:items");
+  });
+
+  it("scanMenu_ShouldNotInvalidateMenuCache_WhenScanFails", async () => {
+    mockScanMenu.mockRejectedValue(new Error("Scan failed"));
+    const req = { files: SAMPLE_FILES } as Request;
+    const res = buildRes();
+
+    await scanMenu(req, res);
+
+    expect(cache.invalidate).not.toHaveBeenCalled();
   });
 
   it("scanMenu_ShouldReturn500_WhenGenericErrorThrown", async () => {

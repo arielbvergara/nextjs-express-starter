@@ -1,3 +1,4 @@
+import { google } from "googleapis";
 import { GoogleAuth } from "google-auth-library";
 import { MenuItem, MenuSection } from "../types";
 import { SheetsService, SheetTableMetadata } from "./sheets";
@@ -17,9 +18,21 @@ const MIN_DATA_ROW_COLUMNS = 2;
 
 export class MenuService {
   private readonly sheetsService: SheetsService;
+  private readonly auth: GoogleAuth;
 
   constructor(auth: GoogleAuth) {
+    this.auth = auth;
     this.sheetsService = new SheetsService(auth);
+  }
+
+  async getMenuSectionsByGid(spreadsheetId: string, gid: number): Promise<MenuSection[]> {
+    const sheetTitle = await this.resolveSheetTitleByGid(spreadsheetId, gid);
+    const tables = await this.sheetsService.getSheetTables(spreadsheetId, sheetTitle);
+    if (tables.length > 0) {
+      return this.sectionsFromTables(spreadsheetId, tables, sheetTitle);
+    }
+    const data = await this.sheetsService.readSpreadsheet(spreadsheetId, sheetTitle);
+    return this.parseMenuSections(data.values);
   }
 
   async getMenuSections(spreadsheetId: string): Promise<MenuSection[]> {
@@ -78,14 +91,26 @@ export class MenuService {
       .map((row) => this.mapRowToMenuItem(row));
   }
 
+  private async resolveSheetTitleByGid(spreadsheetId: string, gid: number): Promise<string> {
+    const authClient = await this.auth.getClient();
+    const sheets = google.sheets({ version: "v4", auth: authClient as never });
+    const response = await sheets.spreadsheets.get({ spreadsheetId });
+    const sheet = response.data.sheets?.find((s) => s.properties?.sheetId === gid);
+    if (!sheet?.properties?.title) {
+      throw new Error(`No sheet found with gid ${gid}`);
+    }
+    return sheet.properties.title;
+  }
+
   private async sectionsFromTables(
     spreadsheetId: string,
-    tables: SheetTableMetadata[]
+    tables: SheetTableMetadata[],
+    sheetName: string = MENU_SHEET_NAME
   ): Promise<MenuSection[]> {
     const sections: MenuSection[] = [];
 
     for (const table of tables) {
-      const range = this.tableRangeToA1(MENU_SHEET_NAME, table);
+      const range = this.tableRangeToA1(sheetName, table);
       const data = await this.sheetsService.readSpreadsheet(spreadsheetId, range);
       // First row of the table range is the header — reuse parseMenuItems which skips row[0]
       const items = this.parseMenuItems(data.values);

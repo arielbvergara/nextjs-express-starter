@@ -112,21 +112,21 @@ describe("MenuScannerSheetsWriter.write", () => {
     const updateCall = mockValuesUpdate.mock.calls[0][0];
     const rows: string[][] = updateCall.requestBody.values;
 
-    // First section header
-    expect(rows[0]).toEqual(["DRINKS", "", ""]);
-    // Column headers
-    expect(rows[1]).toEqual(["Name", "Description", "Price"]);
-    // Item rows
-    expect(rows[2]).toEqual(["Espresso", "Rich espresso", "$2.50"]);
-    expect(rows[3]).toEqual(["Latte", "Steamed milk", "$3.50"]);
+    // First section header — 7 columns, only first is non-empty (MenuService isSectionTitleRow)
+    expect(rows[0]).toEqual(["DRINKS", "", "", "", "", "", ""]);
+    // Column headers — "Title" at col 0 (MenuService isHeaderRow marker), "Price" at col 3, "Image URL" at col 6
+    expect(rows[1]).toEqual(["Title", "Description", "", "Price", "", "", "Image URL"]);
+    // Item rows — price at col 3, empty Image URL at col 6
+    expect(rows[2]).toEqual(["Espresso", "Rich espresso", "", "$2.50", "", "", ""]);
+    expect(rows[3]).toEqual(["Latte", "Steamed milk", "", "$3.50", "", "", ""]);
     // Blank separator
     expect(rows[4]).toEqual([]);
     // Second section header
-    expect(rows[5]).toEqual(["MAINS", "", ""]);
+    expect(rows[5]).toEqual(["MAINS", "", "", "", "", "", ""]);
     // Column headers
-    expect(rows[6]).toEqual(["Name", "Description", "Price"]);
+    expect(rows[6]).toEqual(["Title", "Description", "", "Price", "", "", "Image URL"]);
     // Item rows
-    expect(rows[7]).toEqual(["Steak", "8oz sirloin", "$28.00"]);
+    expect(rows[7]).toEqual(["Steak", "8oz sirloin", "", "$28.00", "", "", ""]);
   });
 
   it("write_ShouldNotAddTrailingSeparatorAfterLastSection_WhenWriting", async () => {
@@ -137,7 +137,7 @@ describe("MenuScannerSheetsWriter.write", () => {
     const rows: string[][] = updateCall.requestBody.values;
     const lastRow = rows[rows.length - 1];
 
-    expect(lastRow).toEqual(["Steak", "8oz sirloin", "$28.00"]);
+    expect(lastRow).toEqual(["Steak", "8oz sirloin", "", "$28.00", "", "", ""]);
   });
 
   it("write_ShouldApplyBoldToSectionAndColumnHeaderRows_WhenWriting", async () => {
