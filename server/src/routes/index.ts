@@ -8,6 +8,7 @@ import chatRoutes from "./chat";
 import locationRoutes from "./location";
 import nearbyRestaurantsRoutes from "./nearbyRestaurants";
 import adminRoutes from "./admin";
+import menuScannerRoutes from "./menuScanner";
 
 const router: IRouter = Router();
 
@@ -20,6 +21,7 @@ router.use("/chat", chatRoutes);
 router.use("/location", locationRoutes);
 router.use("/nearby-restaurants", nearbyRestaurantsRoutes);
 router.use("/admin", adminRoutes);
+router.use("/menu-scanner", menuScannerRoutes);
 
 // Health check
 router.get("/health", (_req, res) => {

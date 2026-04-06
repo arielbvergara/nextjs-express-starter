@@ -35,3 +35,12 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, error: "Too many login attempts, please try again later." },
 });
+
+// 5 requests per minute for menu scan endpoints (Gemini Vision calls are resource-intensive)
+export const scanLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many scan requests, please try again later." },
+});

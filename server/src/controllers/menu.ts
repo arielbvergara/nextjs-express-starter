@@ -3,20 +3,14 @@ import { googleAuth } from "../config/google";
 import { config } from "../config";
 import { MenuService } from "../services/menu";
 import { cache } from "../lib/cache";
+import { MENU_CACHE_KEY } from "../lib/cacheKeys";
 import { ApiResponse, MenuSection } from "../types";
-
-const MENU_CACHE_KEY = "menu:items";
 
 export async function getMenu(
   _req: Request,
   res: Response<ApiResponse<MenuSection[]>>
 ): Promise<void> {
   try {
-    if (!config.google.sheetsId) {
-      res.status(500).json({ success: false, error: "GOOGLE_SHEETS_ID is not configured" });
-      return;
-    }
-
     const cached = cache.get(MENU_CACHE_KEY);
     if (cached) {
       res.json({ success: true, data: cached as MenuSection[] });
@@ -24,7 +18,10 @@ export async function getMenu(
     }
 
     const menuService = new MenuService(googleAuth);
-    const sections = await menuService.getMenuSections(config.google.sheetsId);
+    const sections = await menuService.getMenuSectionsByGid(
+      config.menuScanner.spreadsheetId,
+      config.menuScanner.sheetGid,
+    );
 
     cache.set(MENU_CACHE_KEY, sections);
     res.json({ success: true, data: sections });

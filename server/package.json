@@ -20,12 +20,14 @@
     "google-auth-library": "^9.0.0",
     "googleapis": "^144.0.0",
     "helmet": "^8.0.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "multer": "^2.1.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/morgan": "^1.9.9",
+    "@types/multer": "^2.1.0",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^4.1.1",
     "eslint": "^9.0.0",

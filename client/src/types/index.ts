@@ -75,3 +75,20 @@ export interface CloudinaryImage {
   height: number;
   createdAt: string;
 }
+
+export interface ScannedMenuItem {
+  name: string;
+  description: string;
+  price: string;
+}
+
+export interface ScannedMenuSection {
+  section: string;
+  items: ScannedMenuItem[];
+}
+
+export interface MenuScanResult {
+  sections: ScannedMenuSection[];
+  scannedAt: string;
+  sheetUrl: string;
+}
